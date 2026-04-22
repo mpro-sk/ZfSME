@@ -1,0 +1,293 @@
+#!/bin/bash
+### bash skript slúži na prevod *.rtf súborov zo Zlatý fond Sme do *.tex ###
+#  Tento skript používa programy LibreOffice Writer, antiword, sed, echo   #
+#  vlna a less. Určené pre Mac OS X, testované na 10.4 (pre PPC).          #
+#  Pre spracovanie *.tex súboru je potrebný  CSTeX (pdfcsplain) a OPmac,   #
+#  ako aj súbor makier pre plain/OPmac s názvom ZfSME.tex.                 #
+MAINFILEBASE=$(echo "$1" | sed 's/\.[^.]*$//')
+HEADER=$2
+### echo generuje hlavičku tex súboru (nastavenia a makrá):
+if [ "$HEADER" = "0" ] ; then echo %%% "$MAINFILEBASE".tex > $MAINFILEBASE.tex
+else
+echo %%% "$MAINFILEBASE".tex '
+% Súbor generovaný skriptom zfsme-rtf2tex %
+
+%%% Postup pri spracovaní dokumentu -- urobí tento skript %%%
+
+% 1. Kontrola výskytu znakov \ # & $ ~ % ^ _ { } (majú v TeX špeciálny význam)
+%    a zamení ich za príslušné riadace sekvencie TeX-u.
+% 2. Zmení — za -- , × za $\times$ , ° za \Deg ($^{\circ}$), ‘ za {}\elq{},
+%    ’ za \char39, ę za \ogonek{e} a znaky a̋ za \H{a} a ő za \H{o}.
+% 3. Pripraví RS \, (definované ako \let\,=\thinspace ) a nahradí
+%    číslo_medzera_číslo číslo_\,_číslo (potrebná ešte kontrola a doplnenie)*.
+% 4. Pripraví RS \= a nahradí pomlčku - vo vnútri slova 
+% 5. Pripraví RS pre zlomky \FR čitateľ/menovateľ a nahradí
+%    číslo_/_číslo čitateľ_zlomok_menovateľ, kde zlomok je / (altern. ---).
+% 6. Pred riadky začínajúce sa končiace znakom "*" doplní text "\seccc %"
+%    (pod-pod-sekcia).(*)
+% 7. Programom vlna nahradí medzeru znakom ~ po neslabičných predložkách.(*)
+% 8. Doplní RS \bye na koniec súboru -- možné premiestniť na vhodné miesto.
+%(*) Potrebná kontrola a doplnenie hlavne pre zlomy na konci riadkov.
+
+
+%%% Konfigurácia systému a vlastné makrá %%%
+
+\shyph % zapína slovenské delenie slov vo formáte csplain/pdfcsplain
+\input opmac % používa sa verzia OPmac Apr. 2020 (alebo novšia)
+%% Ďalšie dva riadky odkomentovať len ak používate aj https://tex.mendelu.cz
+%\def\ToWpath{Adresár/Podadresár}    % definovanie adresára na TeXonWeb 
+%\input TeXonWeb                     % pridá cestu k súborom na TeXonWeb
+\raggedbottom                        % nezarovnaný spodný okraj strany
+%% Potlačenie výskytu sluru; odkomentovať až po odladení výstupu
+%\overfullrule=0pt
+
+%% Nastavenie klikacích odkazov (funkčné len pri výstupe do pdf),
+%% vo formáte {interný}{externý -- napr. www adresa} odkaz. 
+%% Po zakomentovaní oboch riadkov nebudú žiadne klikacie odkazy funkčné.
+%\hyperlinks{\Blue}{\Green}    % nastavenie farebných klikacích odkazov
+\hyperlinks{}{}                % nastavenie č/b klikacích odkazov 
+
+%% \Capinsert První písmeno bude větší, tj. P v tomto případě...
+%% https://petr.olsak.net/opmac-tricks.html#capinsert
+%% po odkomentovaní zapnutie funkcie \Capinsert
+%\def\IfCapInsert{2} % 1 - len pre predhovory, 2 - pre všetky kapitoly
+\def\CapNumLines{2}			 % počet riadkov písmena (2 alebo 3)
+\newdimen\ptex       \ptex=.1ex          % jednotka závislá na ex 
+\newdimen\VshiftFont \VshiftFont=0\ptex  % vertikálny posun pre písmeno
+\def\Capprefix{\localcolor\Red}          % makro provedené před písmenem 
+%\def\Capprefix{\localcolor\Grey}        % makro provedené před písmenem 
+
+%% Zmena použitých základných fontov, namiesto prednastaveného:
+\def\FontType{Computer Modern vo variante \CS-font} \let\CMCS=\FontType
+%% Pôvodné fonty z inšalácie \CS\TeX (majú spoločný rez pre \it a \sl),
+%% (odkomentovať len jeden z nasledovných 4 riadkov):
+%\input ctimes \def\FontType{Times Roman} 
+%\input cbookman \def\FontType{Bookman} \VshiftFont=2\ptex
+%\input cncent \def\FontType{New Century} \VshiftFont=4.4\ptex
+%\input cpalatin \def\FontType{Palatino} \VshiftFont=4\ptex 
+%% Nové fonty z inšalácie \CS\TeX (rez pre \sl je použitý z CS-CM,
+%% pokiaľ nie je aktívna RS \let\sl=\it na konci riadku);
+%% (odkomentovať len jeden z nasledovných 4 riadkov):
+%\input lmfonts \def\FontType{Latin Modern} % odporúčaná náhrada za CM
+%\input cs-charter \def\FontType{Charter}  \let\sl=\it \VshiftFont=3\ptex
+%\input cs-antt \def\FontType{Antykwa To\-runska}  \let\sl=\it % *
+%\input cs-polta \def\FontType{Antykwa Pó\l taw\-skiego}  \let\sl\it % *
+%% * v niektorých systémoch je potrebné doinštalovať tieto fonty do TeXLive
+%% (napr. balík texlive-fonts-extra pre Debian/Ubuntu)
+
+%% Nastavenie formátu obrázkov (pdf/png/eps)
+\def\ObrPdf{0}
+%\def\ObrPdf{1} % zakomentovať riadok pre použitie farebných obrázkov
+%%\def\ObrPdf{2} \input epsf % odkomentovať riadok pre výstup do dvi (už nie
+                             % je potrebné, príslušné makrá si to nastavia)
+
+%% Nastavenie grafických súborov pre logo Zlatý fond SME; 
+%% (pokiaľ nechcete meniť názvy súborov, nechať zakomentované):
+%\def\LogoZfSMEbc{zlaty_fond.png} % veľké farebné logo ZfSME pre PDF výstup
+%\def\LogoZfSMEbg{zlaty_fond-g.png} % veľké č/b logo ZfSME pre PDF výstup
+%\def\LogoZfSMEbe{zlaty_fond.eps} % veľké farebné logo ZfSME pre DVI výstup
+%\def\LogoZfSMEsc{zlaty_fond_maly.png} % malé farebné logo ZfSME päty strany
+%\def\LogoZfSMEsg{zlaty_fond_maly-g.png} % malé č/b logo ZfSME päty strany
+
+%% Nastavenie zobrazenia loga Zlatý fond SME v strede päty strany:
+\def\LogoZF{-1} % namiesto loga čísla strán v strede päty (pre e-book)
+\def\LogoZF{0} % bez zobrazenia loga
+%\def\LogoZF{1} % zobarzenie textu loga
+%\def\LogoZF{2} % zobrazenie grafického loga (len pre výstup do pdf)
+%\def\ZfSME{{\rm Zlatý fond SME}} % definovanie textu a formátu loga
+
+%% Nastavenie tlače záhlavia strany:
+\def\ZahlavieTlac{0} 
+\def\ZahlavieTlac{1} % netlačí sa po zakomentovaní riadku
+
+%% Potlačenie tlače záhlavia a päty strany na prázdnych stranách:
+%\def\EmptyHLFL{0} % tlačí sa po odkomentovaní riadku (neodporúča sa)
+
+%% Nastavenie hlavičky pre motto:
+%\def\MottoH{Motto:} % zobrazí sa v hlavičke motta po odkomentovaní
+
+%% Zapnutie automatického číslovania kapitol a pod/sekcií po odkomentovaní
+%\def\NoNum{0} % nastaví sa po odkomentovaní riadku
+
+%% Zapnutie linkov na strany pre index po odkomentovaní
+%\def\IndexLink{1}
+%% Zapnutie delenia podľa začiatočného písmena pre index po odkomentovaní
+%\def\IndexChar{1}
+
+%% Nastavenie formátu zlomku:
+\def\FRformat{0}  % formát zlomkovej čiary  /
+%\def\FRformat{1} % formát zlomkovej čiary --- 
+
+%% Nastavenie minimálnej veľkosti šírky strany, pri ktorej sa bude text
+%% zarovnávať do bloku bez zväčšenia medzier:
+\def\MinHSize{100mm}
+%\emergencystretch=2em % nastavenie väčších medzier bez podmienky \MinHSize
+%% Nastavenie minimálnej veľkosti šírky strany, pri ktorej sa bude text
+%% zarovnávať do bloku (pri užšej strane bude text zarovnaný vľavo):
+\def\MinHsize{80mm}
+
+%% Nastavenie zarovnania vľavo pre sekciu, podsekciu a popodsekciu:
+\def\SecLeft{0}
+\def\SecLeft{1} % zarovnanie pod/pod/sekcie do bloku po zakomentovaní riadku 
+
+%% Nastavenie min. veľkosti ľavého + pravého okraja pre visiacu interpunkciu:
+%\def\MinOkraj{9cm} % odkomentovať pre vypnutie aj pre knižné formáty
+
+%% Doplnenie veľkosti strán pre A6 a e-booky:
+\sdef{pgs:a6}{(105,148)mm} 
+\sdef{pgs:eb}{(96,156)mm}  \sdef{pgs:ebr}{(96,96)mm}
+\sdef{pgs:ebsr}{(78,78)mm} % 78mm je najmenší rozmer pre tabuľku Miery a váhy
+%\sdef{pgs:názov}{(<šírka>,<výška>)} % vlastný formát
+
+%% Nastavenie základnej veľkosti použitých fontov a veľkosti strany,  po zako-
+%% mentovaní všetkých riadkov v tejto časti sa použije nastavenie pre csplain:
+%% strana veľkosti A4, okraje 2,54 cm, veľkosť fontu 10 pt, riadkovanie 12 pt.
+%% Font veľkosti 11 pt, riadkovanie 12,5 pt, vhodné pre väčšiu veľkosť strany:
+%\typosize[11/12.5] \VshiftFont=1.25\VshiftFont
+%\margins/2 a4 (20,37,27,52)mm % formát A4, P/Ľ zrkadlo, pre a=1/4 šírky strany
+%\margins/2 a4 (17,30,24,42)mm % formát A4, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%\margins/1 b5 (24,24,24,24)mm % nastavenie formátu B5 a všetky okraje na 24mm
+%\margins/2 b5 (14,26,20,35)mm % formát B5, P/Ľ zrkadlo, pre a=1/5 šírky strany
+\margins/1 a5 (18,18,18,18)mm % nastavenie formátu A5 a všetky okraje na 18mm
+%\margins/2 a5 (14,22,18,28)mm % formát A5, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%% Nastavenia strany pre e-book (zariadenia formátu A6, alebo vlastný formát)
+%\margins/1 a6 (3,3,3,11)mm % nastavenie formátu A6, okraje na 3mm, spodný 11mm
+                            % (zobrazí sa aj číslo strany v strede päty)
+%\margins/1 eb (3,3,3,11)mm % nastavenie formátu na ebook, okraje na 3 a 11mm 
+                            % (zobrazí sa aj číslo strany v strede päty)
+%\margins/1 ebsr (1,1,1,1)mm %nastavenie formátu na ebook, všetky okraje na 1mm
+                            %(v tomto prípade sa nebudú zobrazovať čísla strán)
+
+%% Posun titulu na titulnej strane na cca zlatý stred
+\def\TitSkip{.1} % prednastavená hodnota je 0,1 výšky strany
+\ifdim\vsize < \MinHsize % len pre formát ebsr
+%\def\TitSkip{-.1} % odkomentovať len pre viac mien, alebo dlhý názov
+\fi
+
+%% Načítanie vlastných makier pre Zlatý fond Sme:
+\ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
+\input \ZFroot ZfSME
+%% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
+%\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
+%\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
+
+%% Nastavenie informácií o titule a autorovi; v prípade dlhého názvu alebo mena
+%% je možné použiť \nl na oddelenie riadkov v parametri \Titul a \Autor napr.
+%% \def\Autor{Meno \nl Priezvisko}
+\def\Titul{Titul}
+\def\Autor{Meno Priezvisko}
+%% Nastavenie informácií v PDF - viď TPP, strany 94 až 95:
+\input pdfuni % umožní vkladať PDF informácie v kódovaní UTF-16BE Unicode
+\pdfunidef\tmp{\Autor}    \pdfinfo{/Author (\tmp)}
+\pdfunidef\tmp{\Titul}    \pdfinfo{/Title (\tmp)}
+
+%%% 
+' > $MAINFILEBASE.tex;
+fi
+
+### rozšírená hlavička o strany patitulu, titulu, copyrightu a obsahu
+if [ "$HEADER" -gt "1" ] ; then echo '
+%% Nastavenie výnimiek pre delenie slov
+\hyphenation{naj-mlad-šiemu dvad-sať-štyri ú-my-sle ús-tach hrn-com}
+
+
+ 
+%%% Patitul (str. 1) %%%
+\PatitulStrana
+
+
+
+%%% Titul (str. 3) %%%
+\TitulStrana
+
+
+
+%%% Copyright (str. 4) %%%
+
+%% Po odkomentovaní zobrazenie záporne číslovaných strán rímskymi číslicami: 
+%\PageNumbersRoman
+
+\Digitalizator{%
+Digitalizátor:}{MenoPriezvisko1, MenoPriezvisko2, ...}
+
+% © aj \copyright vo fonte Charter sa zobrazí ako \
+\CopyR{Copyright © yyyy Zlatý fond denníka SME}
+\medskip
+
+\CCL{%
+Tento súbor podlieha licencii}
+{Creative Commons  Attribution\=NonCommer\-cial\=NoDerivs  2.5  License.}
+
+\noindent
+Viac  informácii  na: 
+\smallskip
+\ZFurl 
+
+\TypoInfo % informácia po použití TeX-u a o použitom fonte
+\NewPage\NewPageIfEven
+
+
+
+%%% Obsah (str. 5) %%%
+
+\Outlines % záložky v pdf generované len pre e-booky
+\notoc\sec Obsah
+%% Tu sa bude generovať obsah:
+\maketoc
+
+\NewPage\NewPageIfEven
+
+
+
+%%% Vlastný text knihy %%%
+
+%% Nastavenie číslovania strán (odkomentovať len 1 riadok z 2):
+\pageno=1 \PageNumbers %obnovenie číslovania strán od strany 1
+%\pageno=-\pageno \PageNumbers %pokračovanie číslovania strán arab. číslicami
+%% Nastavenie záhlavia
+%\let\ChapTitle=\Titul % nastavenie tlače titulu knihy na ľavú stranu záhlavia
+%\let\ChapTitle=\Autor % nastavenie tlače autora knihy na ľavú stranu záhlavia
+%\TlacZahlavia
+' >> $MAINFILEBASE.tex;
+fi
+### skonvertuje rtf (alebo iný súbor čitateľný LO Writer) do dočasného doc 
+### súboru, s ktorým bude pracovať program antiword:
+#libreoffice --headless --infilter=“writer_rtf_import” --convert-to doc $1;
+/Applications/LibreOffice.app/Contents/MacOS/soffice.bin --headless --infilter=“writer_rtf_import” --convert-to doc $1;
+### vygeneruje obsah tex súboru z dočasného doc:
+antiword -f -m UTF-8 $MAINFILEBASE.doc | sed 's/\\/|||/g;s/\$/\$|||/g; s/{/\$\\{$/g;s/}/\$\\}$/g ; s/%/\\%/g;s/~/\\~{}/g ; s/&/\\&/g ; s/\^/{\\tt\\char94}/g ; s/_/{\\tt\\char95}/g ; s/#/\\#/g;s/\$|||/\\\$/g ; s/|||/$\\backslash$/g ; s/—/--/g ; s/–/--/g ; s/°/\\Deg{}/g ; s/×/\$\\times$/g ; s/‘/{}\\elq{}/g ; s/’/\\char39{}/g ; s/ę/\\ogonek{e}/g; s/a̋/\\H{a}/g ; s/ő/\\H{o}/g ; s/ /~/g ; s/\([0-9]\) \{1,\}\([0-9]\)/\1\\,\2/g ; s/\([0-9a-z]\)-\{1,\}\([A-Za-z]\)/\1\\=\2/g ; s/\([0-9]\{1,\}\)\/\([0-9]\{1,\}\)/\\FR \1\/\2 /g ; s/^[ ]*[*][ ]*$/\\Hviezdicka/g ; s/ \{1,5\}--/~--/g ; s/^[ ]*[*]\(.\{1,\}\)[*][ ]*$/\
+\\seccc %\
+\1\
+/g ; s/^\([ ]*[/].\{1,\}\)[/][ ]*$/\1\\nl/g ' | vlna -f >>  $MAINFILEBASE.tex;
+### vygeneruje koniec tex súboru:
+echo '\bye
+%%% ' >>  $MAINFILEBASE.tex;
+# zobrazí vygenerovaný tex súbor:
+#less $MAINFILEBASE.tex; # po odladení je možné tento riadok zakomentovať
+### vymaže dočasný doc súbor:
+rm $MAINFILEBASE.doc
+### pokiaľ všetko prebehlo v poriadku, nasleduje ukončenie tohto skriptu:
+exit 0
+
+Vysvetlenie vzorov pre sed: 
+
+Znak /g na konci znamená zmenu vo všetkých riadkoch, jednotlivé vzory sú
+oddelené bodkočiarkou (;) , alebo novým riadkom a všetky vzory sú sú uzavreté
+v párových úvodzovkách 'vzor1;vzor2;...;vzorN'.
+
+###
+
+https://www.gnu.org/software/sed/manual/sed.html#Multiline-techniques
+sed '/./{H;$!d} ; x ; s/\([1-9A-Z].\+[a-z)]\)$/\\seccc %\n\1/' -i $MAINFILEBASE.tex;
+
+úprava na: sed '/./{H;$!d} ; x ; s/^\(\n[1-9A-Z].\+[a-z)]\)$/\n\\seccc %\1/'
+viď https://forum.root.cz/index.php?topic=27670.0
+# pôvodné riešenie
+#/./{H;$!d} ; x ; s/^\(\n[1-9A-Z].\+[a-z)]\)$/\n\\seccc %\1/ upravené na
+# hviezdičky na začiatku a konci odstavca (veľmi reštriktívne):
+#/./{H;$!d} ; x ; s/^\n[*]\(.\+\)[*]$/\n\\seccc %\n\1/
+# preto stačí hviezdička na konci odstavca a niekde pretým v odstavci: 
+/./{H;$!d} ; x ; s/[*]\(.\+\)[*]$/\n\\seccc %\n\1/
+
+Vo vim funguje aj toto :%s/\(\n\n\)\(^[A-Z].\+[a-z]$\n\n\)/\1\\seccc \2/g
+

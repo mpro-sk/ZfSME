@@ -1,0 +1,113 @@
+#!/bin/bash
+###   bash skript slúži na prevod *.pdf súborov do prázdnych *.BB.eps    ###
+#  Tento skript používa programy grep, sed, echo, cat, od, cut, head a tr  #
+#  Z pdf/png/jpg vytvorí prázdny eps súbor, ktorý má rovnaký BoundigBox    #
+#  pre pdf z MediaBox, pre png a jpg z počtu pixelov horiz./vertik. a dpi  #
+#  Verzia pre Linux, testované na Ubuntu 22.04 a Raspbian 10 (buster)      #
+
+dpi="0"
+for file in "$@"; do
+MAINFILEBASE=$(echo "$file" | sed 's/\.[^.]*$//')
+FILEXT=$(echo "$file" | sed 's/^.*\.//')
+
+if [ "$FILEXT" = "pdf" ] || [ "$FILEXT" = "PDF" ] ; then
+bbox=$(echo "$(grep -Ua MediaBox $file)" | sed 's/^.\+\[\(.\+\)\]/\1/')
+### echo generuje eps súbor z premennej bbox:
+echo "%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: $bbox
+%%EOF" > $MAINFILEBASE.BB.eps;
+fi
+
+if [ "$FILEXT" = "png" ] || [ "$FILEXT" = "PNG" ] ; then
+### automatické nastavenie dpi z png súboru: *1
+if [ "$(grep -a -o 'pHYs' $file)" = "pHYs" ] ; then
+hhdpi=$(od -j$(echo $(grep -a -o -b 'pHYs' $file | cut -d: -f1)) -N13 -d --endian=big $file | head -n1 | tr -s " " | cut -d ' ' -f 4)
+hdpi=$(od -j$(echo $(grep -a -o -b 'pHYs' $file | cut -d: -f1)) -N13 -d --endian=big $file | head -n1 | tr -s " " | cut -d ' ' -f 5)
+hvdpi=$(od -j$(echo $(grep -a -o -b 'pHYs' $file | cut -d: -f1)) -N13 -d --endian=big $file | head -n1 | tr -s " " | cut -d ' ' -f 6)
+vdpi=$(od -j$(echo $(grep -a -o -b 'pHYs' $file | cut -d: -f1)) -N13 -d --endian=big $file | head -n1 | tr -s " " | cut -d ' ' -f 7)
+dpicheck=$(od -j$(echo $(grep -a -o -b 'pHYs' $file | cut -d: -f1)) -N13 -d $file | head -n1 | tr -s " " | cut -d ' ' -f 8)
+if [ "$dpicheck" = "1" ] ; then 
+let hdpi=65536*hhdpi+hdpi hdpi=hdpi*254/10000 ;
+let vdpi=65536*hvdpi+vdpi vdpi=vdpi*254/10000 dpi=hdpi ;
+fi fi
+### ručné nastavenie dpi, ak nie je možné zistiť z png súboru:
+   if [ "$dpi" = "0" ] ; then
+   echo "Prednastavená hodnota DPI je 72"
+   read -p 'DPI: ' dpi
+       if [ "$dpi" = "" ] ; then
+       dpi="72"
+       fi
+   let hdpi=dpi vdpi=dpi ;
+   fi
+#echo "DPI je $dpi" # po odladení je možné tento riadok zakomentovať
+hsize=$(echo "$(file -b $file)" | sed 's/^.\+ \([0-9]\+\) x.\+/\1/')
+vsize=$(echo "$(file -b $file)" | sed 's/^.\+x \([0-9]\+\).\+/\1/')
+let hsize=hsize*72/hdpi vsize=vsize*72/vdpi ;
+### vygeneruje eps súbor z premenných hsize a vsize:
+echo "%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: 0 0 $hsize $vsize
+%%EOF" > $MAINFILEBASE.BB.eps;
+fi
+
+if [ "$FILEXT" = "jpg" ] || [ "$FILEXT" = "JPG" ] || [ "$FILEXT" = "jpeg" ] || [ "$FILEXT" = "JPEG" ] ; then
+### automatické nastavenie dpi z jpg súboru: *2
+if [ "$(grep -a -o 'JFIF' $file)" = "JFIF" ] ; then
+hdpi=$(od -j$(echo $(grep -a -o -b 'JFIF' $file | cut -d: -f1)) -N12 -d --endian=big $file | head -n1 | tr -s " " | cut -d ' ' -f 6)
+vdpi=$(od -j$(echo $(grep -a -o -b 'JFIF' $file | cut -d: -f1)) -N12 -d --endian=big $file | head -n1 | tr -s " " | cut -d ' ' -f 7)
+dpicheck=$(od -j$(echo $(grep -a -o -b 'JFIF' $file | cut -d: -f1)) -N12 -t x1 $file | head -n1 | tr -s " " | cut -d ' ' -f 8)
+if [ "$dpicheck" = "01" ] ; then let dpi=hdpi ;
+fi fi
+### ručné nastavenie dpi, ak nie je možné zistiť z jpg súboru:
+   if [ "$dpi" = "0" ] ; then
+   echo "Prednastavená hodnota DPI je 72"
+   read -p 'DPI: ' dpi
+       if [ "$dpi" = "" ] ; then
+       dpi="72"
+       fi
+   let hdpi=dpi vdpi=dpi dpi=0 ;
+   fi 
+#echo "DPI je $dpi" # po odladení je možné tento riadok zakomentovať
+hsize=$(echo "$(file $file)" | sed 's/^.\+x.\+ \([0-9]\+\)x.\+/\1/')
+vsize=$(echo "$(file $file)" | sed 's/^.\+x.\+x\([0-9]\+\).\+/\1/')
+let hsize=hsize*72/hdpi vsize=vsize*72/vdpi ;
+### vygeneruje eps súbor z premenných hsize a vsize:
+echo "%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: 0 0 $hsize $vsize
+%%EOF" > $MAINFILEBASE.BB.eps;
+fi
+
+if [ "$FILEXT" = "pdf" ] || [ "$FILEXT" = "PDF" ] || [ "$FILEXT" = "png" ] || [ "$FILEXT" = "PNG" ] || [ "$FILEXT" = "jpg" ] || [ "$FILEXT" = "JPG" ] || [ "$FILEXT" = "jpeg" ] || [ "$FILEXT" = "JPEG" ] ; then :
+else echo "Súbor $file nie je pre prevod podporovaný"
+fi
+
+### zobrazí vygenerovaný eps súbor:
+#echo "Subor $file :" # po odladení je možné tento riadok zakomentovať
+#cat $MAINFILEBASE.BB.eps; # po odladení je možné tento riadok zakomentovať
+done
+### pokiaľ všetko prebehlo v poriadku, nasleduje ukončenie tohto skriptu:
+exit 0
+
+
+### Poznámky
+
+Ad *1) PNG formát 
+https://www.root.cz/clanky/nepovinne-chunky-v-png-a-kontrola-pomoci-crc
+Pre súbor zlaty_fond_maly-g.png je chunk pHYs nasledovný:
+00 00 2e 23 00 00 2e 23 01
+hex 00 00 2e 23 horizontálna hustota pixelov (4 byty)
+hex 00 00 2e 23 vertikálna hustota pixelov (4 byty)
+hex 01 hodnoty sú v pixeloch/meter
+dec 11811 pixelov/meter
+118,11 pixelov/cm, čo je 300 pixelov/palec (dpi 299,9994)
+
+Ad *2) JPG/JFIF formát
+https://www.root.cz/clanky/programujeme-jpeg-interni-struktura-souboru-typu-jfifjpeg
+hlavička JFIF 00 01 01 a potom nasleduje:
+hex 01 používa sa dpi (1 byte)
+hex 00 48 horizontálna hustota pixelov (2 byty)
+hex 00 48 vertikálna hustota pixelov (2 byty)
+dec 72 dpi
+
+grep -a pre prehľadávanie binárneho súboru
+pre použitie "od" viď https://www.root.cz/clanky/hexadecimalni-prohlizece-a-editory-s-textovym-uzivatelskym-rozhranim
+

@@ -1,0 +1,84 @@
+\shyph % slovenské delenie slov pre pdfcsplain
+\input opmac
+\margins/1 a5 (18,18,18,18)mm % nastavenie formátu A5 a všetky okraje na 18mm
+\activettchar"   % nastavuje znak " pre zahájenie a ukončenie verbatim textu
+\emergencystretch=2em
+\hyperlinks{}{}  % nastavenie č/b klikacích odkazov
+
+%% nastaví lámanie riadkov medzi \begtt ... \endtt, viď 
+%% https://petr.olsak.net/opmac-tricks.html#verbbreak
+\def\tthook{\rightskip=0pt plus1fil
+  \def\ {\discretionary{\hbox{$\;\setminus$}}{}{\kern.5em}}%
+  \everypar={\countspaces}}
+\def\countspaces#1\fi{#1\fi\hangindent=\ttindent \countspacesA}
+\def\countspacesA{\futurelet\next\countspacesB}
+\def\countspacesB{\ifx\next\spacemacro \expandafter\countspacesC\fi}
+\def\countspacesC#1{\advance\hangindent by.5em\ \countspacesA}
+\def\spacemacro{\ }
+
+%% Nepoužil sa program vlna pre zdrojový text, preto:
+\input  encxvlna
+
+
+
+%%% Vlastný text %%%
+
+\nonum\sec Úprava skriptu vimura
+
+Pôvodný skript vimura z \url{https://gist.github.com/vext01/16df5bd\|48019d451e078}, 
+používa pdf prehliadač Zathura a textový editor Vim.
+Pomocou neho je možné používať obojsmernú synchronizáciu medzi zdrojovým
+textom editovaným editorom Vim, ktorý je doplnený o niekoľko makier a
+výsledným pdf súborom zobrazeným prehliadačom Zathura, ktorý túto
+synchronizáciu podporuje pomocou rozšírenia Synctex. Obmedzením je jeho
+použitie len na jednoduché projekty, kedy zdrojový tex súbor a výsledný pdf
+súbor musia mať rovnaký názov súboru, rozdielna je len ich prípona. Pre
+väčšie projekty zložené z viacerých zdrojových súborov sa preto nehodí.
+
+Pre odstránenie tohto obmedzenia vznikol upravený skript, ktorý používa pre
+názov hlavného súboru (bez jeho prílohy je rovnaký ako zobrazovaný pdf
+súbor) premennú uloženú v súbore "~/.tlfname" (pre rovnaký účel používa
+tento súbor aj skript texloop -- odtiaľ jeho názov) a číslo procesu
+príslušného terminálu, kde beží skript vimura v súbore "~/.ttynum" -- tento
+slúži na zobrazenie logu z behu \TeX-u pri jeho preklade. Pre ich načítanie
+vo Vim-e je potrebné doplniť konfiguračný súbor "~/.vimrc" o tieto riadky:
+
+\ttline=0\begtt
+let fname = readfile(glob('~/.tlfname'))[0]
+let ttynum = readfile(glob('~/.ttynum'))[0]
+\endtt
+
+Tieto súbory vytvára skript vimura, preto je ho vhodné spustiť už pred prvým
+spustením Vim-u s takto doplneným súborom ".vimrc". Ten je potrebné doplniť
+aj funkciu Synctex:
+
+\begtt
+function! Synctex()
+   execute "silent !zathura --synctex-forward " . line('.') . ":" . col('.') . ":" . bufname('%') . " " . g:syncpdf 
+  redraw! 
+endfunction
+\endtt
+
+Pre použitie tejto funkcie namapujeme jej spustenie v príkazovom (map) aj vo
+vkladacom režime (imap) na kombináciu kláves "Ctrl-Enter" doplnením týchto 
+riadkov do ".vimrc":
+
+\begtt
+map <C-enter> :call Synctex()<CR>
+imap <C-enter> <ESC> :call Synctex()<CR>i
+\endtt
+
+Obdobne pre obidva režimy namapujeme pre kombináciu kláves "Ctrl-F5" preklad
+zdrojového tex súboru pomocou pdfcsplain do výsledného pdf súboru doplnením
+týchto riadkov do ".vimrc":
+
+\begtt
+map <C-F5> <ESC>:wa<CR>:exec ":redir! > " . ttynum <CR>:exec "!pdfcsplain -synctex=1 " . fname <CR><CR> :exec ":redir END" <CR>
+imap <C-F5> <ESC>:wa<CR>:exec ":redir! > " . ttynum <CR>:exec "!pdfcsplain -synctex=1 " . fname <CR><CR>:exec ":redir END" <CR> i
+\endtt
+kde sa počas prekladu zobrazuje jeho priebeh v okne samotného vim-u (či
+podľa jeho konfigurácie v skripte vimura jeho grafickom variante gvim), kde
+sa po preklade znovu objaví editovaný text. Po preklade je možné jeho
+priebeh skontrolovať v okne terminálu, odkiaľ bol spustený bash skript vimura.
+
+\bye

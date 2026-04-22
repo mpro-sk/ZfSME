@@ -1,0 +1,50 @@
+#!/bin/bash
+###   bash skript slúži na prevod *.pdf súborov do prázdnych *.BB.eps    ###
+#  Tento skript používa programy grep, sed, echo, file a cat.              #
+#  Z pdf/png vytvorí prázdny eps súbor, ktorý má rovnaký BoundigBox        #
+#  pre pdf z MediaBox, pre png z počtu pixelov horizont./vertik. a dpi     #
+#  Multiplatfornmá verzia (testované na linuxových aj BSD systémoch)       #
+
+dpi="0"
+for file in "$@"; do
+MAINFILEBASE=$(echo "$file" | sed 's/\.[^.]*$//')
+FILEXT=$(echo "$file" | sed 's/^.*\.//')
+
+if [ "$FILEXT" = "pdf" ] || [ "$FILEXT" = "PDF" ] ; then
+bbox=$(echo "$(grep -Ua MediaBox $file)" | sed 's/^.\{1,\}\[\(.\{1,\}\)\]/\1/')
+### echo generuje eps súbor z premennej bbox:
+echo "%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: $bbox
+%%EOF" > $MAINFILEBASE.BB.eps;
+fi
+
+if [ "$FILEXT" = "png" ] || [ "$FILEXT" = "PNG" ] ; then
+   if [ "$dpi" = "0" ] ; then
+   echo "Prednastavená hodnota DPI je 72"
+   read -p 'DPI: ' dpi
+       if [ "$dpi" = "" ] ; then
+       dpi="72"
+       fi
+   #echo "DPI je $dpi" # po odladení je možné tento riadok zakomentovať
+   fi 
+hsize=$(echo "$(file $file)" | sed 's/^.\{1,\} \([0-9]\{1,\}\) x.\{1,\}/\1/')
+vsize=$(echo "$(file $file)" | sed 's/^.\{1,\}x \([0-9]\{1,\}\).\{1,\}/\1/')
+let hsize=hsize*72/dpi vsize=vsize*72/dpi ;
+### vygeneruje eps súbor z premenných hsize a vsize:
+echo "%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: 0 0 $hsize $vsize
+%%EOF" > $MAINFILEBASE.BB.eps;
+fi
+
+if [ "$FILEXT" = "pdf" ] || [ "$FILEXT" = "PDF" ] || [ "$FILEXT" = "png" ] || [ "$FILEXT" = "PNG" ] ; then :
+else echo "Subor $file nie je pre prevod podporovany"
+fi
+
+### zobrazí vygenerovaný eps súbor:
+#echo "Subor $file :" # po odladení je možné tento riadok zakomentovať
+#cat $MAINFILEBASE.BB.eps; # po odladení je možné tento riadok zakomentovať
+done
+### pokiaľ všetko prebehlo v poriadku, nasleduje ukončenie tohto skriptu:
+exit 0
+
+

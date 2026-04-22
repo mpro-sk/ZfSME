@@ -1,0 +1,31 @@
+#!/bin/sh 
+echo $1 
+MAINFILE=$1
+MAINFILEBASE=`echo $1 | cut -d. -f1`
+echo $MAINFILEBASE > ~/.tlfname
+TTYNUM=$(ps a | grep "vimura $MAINFILEBASE" | awk 'NR==1{print $1}')
+echo "/proc/$TTYNUM/fd/1" > ~/.ttynum
+
+
+if [ -f $MAINFILEBASE.synctex.gz ] ; then
+zathura -x "gvim --servername $1 -c \"let g:syncpdf='$1'\" --remote +%{line} %{input}" $*
+#zathura -x "uxterm -geometry 80x48 -e vim --servername vimura -c \"let g:syncpdf='$1'\" --remote +%{line} %{input}" $*
+else
+pdfcsplain -synctex=1 $MAINFILEBASE
+zathura -x "gvim --servername $1 -c \"let g:syncpdf='$1'\" --remote +%{line} %{input}" $*
+#zathura -x "uxterm -geometry 80x48 -e vim --servername vimura -c \"let g:syncpdf='$1'\" --remote +%{line} %{input}" $*
+fi
+
+exit 0
+
+In your vimrc:
+
+function! Synctex()
+         " remove 'silent' for debugging
+         execute "silent !zathura --synctex-forward " . line('.') . ":" . col('.') . ":" . bufname('%') . " " . g:syncpdf
+endfunction
+
+map <C-enter> :call Synctex()<cr>
+map <C-F5> :wa<CR>:execute "!pdfcsplain -synctex=1 " . fname <CR><CR>
+imap <C-F5> <ESC>:wa<CR>:execute "!pdfcsplain -synctex=1 " . fname <CR><CR> i
+
