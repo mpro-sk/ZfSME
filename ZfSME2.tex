@@ -1,0 +1,1043 @@
+%%%                          Súbor ZFSme2.tex                             %%%
+% Obsahuje vlastné makrá pre spracovanie  kníh  z  rtf  súborov  zo  stránok
+% http://zlatyfond.sme.sk, ktoré boli  odladené  pre  knihu  Hviezdoveda  od
+% Gustáva Reussa. Pre spracovanie iných  kníh  bude  pravdepodobne  potrebné
+% doplniť niektoré makrá. Pre vlastné makrá je okrem samotného systému plain
+% pdfTeX potrebný aj CSTeX a súbor makier OPmac.
+%
+% Upravené makrá ZFSme.tex vedia dodržať riadkový register v prípade formátov
+% určenými pre tlač, ale pokiaľ nie je nastavený parameter \RiadkovyRegister
+% na hodnotu 1, výstup bude zhodný, ako pri použití makier ZFSme.tex.
+%%% Len testovacia verzia vo vývoji, ešte nie je upravené všetko potrebné !!!
+
+%%%            Príklad konfigurácie v sparacovávanom súbore .tex          %%%
+%% V súbore ZfSME.tex nechať všetky možnosti zakomentované, nastavovať     %%
+%% konfiguráciu až v súbore, ktorý budeme spracovávať TeX-om               %%
+
+%% Úvodné nastavenie CSTeX a OPmac kde by malo byť aspoň toto:
+%\shyph % zapína slovenské delenie slov vo formáte csplain/pdfcsplain
+%\input opmac % používa sa verzia OPmac Apr. 2020 (alebo novšia)
+%\raggedbottom           % nezarovnaný spodný okraj strany
+
+%% Potlačenie výskytu sluru; odkomentovať až po odladení výstupu
+%\overfullrule=0pt
+
+%% Nastavenie klikacích odkazov (funkčné len pri výstupe do pdf),
+%% vo formáte {interný}{externý -- napr. www adresa} odkaz. 
+%% Po zakomentovaní oboch riadkov nebudú žiadne klikacie odkazy funkčné.
+%\hyperlinks{\Blue}{\Green}    % nastavenie farebných klikacích odkazov
+%\hyperlinks{}{}               % nastavenie č/b klikacích odkazov
+
+%% \Capinsert První písmeno bude větší, tj. P v tomto případě...
+%% https://petr.olsak.net/opmac-tricks.html#capinsert
+%% Potrebné odladiť na: 
+%% - viac odstavcov zasahujúcich prvé písmeno: \nli, \nlii
+%% - automaticky posunúť nahor prvé písmeno s diakritikou: \VshiftFont
+%% - pri použití závesnej interpunkcie na začiatku riadku zasahuje do písmena
+%% - zmena fontu vyžaduje zmenu parametrov, hlavne s diakritikou: \CapIskip,
+%%   \CapIIskip pridáva medzeru nad písmeno s \CapInsert, CapIInsert
+%% po odkomentovaní zapnutie funkcie \Capinsert
+%\def\IfCapInsert{1} % 1 - len pre predhovory, 2 - pre všetky kapitoly
+%\def\CapNumLines{2}			  % počet riadkov písmena (2 alebo 3)
+%\newdimen\ptex       \ptex=.1ex          % jednotka závislá na ex 
+%\newdimen\VshiftFont \VshiftFont=0\ptex  % vertikálny posun pre písmeno
+%\def\Capprefix{\localcolor\Red}          % makro provedené před písmenem 
+%\def\Capprefix{\localcolor\Grey}         % makro provedené před písmenem 
+%
+%% Zmena použitých základných fontov, namiesto prednastaveného:
+%\def\FontType{Computer Modern vo variante \CS-font} \let\CMCS=\FontType
+%% Pôvodné fonty z inšalácie \CS\TeX (majú spoločný rez pre \it a \sl),
+%% (odkomentovať len jeden z nasledovných 4 riadkov):
+%\input ctimes \def\FontType{Times Roman} 
+%\input cbookman \def\FontType{Bookman} \VshiftFont=2\ptex
+%\input cncent \def\FontType{New Century} \VshiftFont=4.4\ptex
+%\input cpalatin \def\FontType{Palatino} \VshiftFont=4\ptex 
+%% Nové fonty z inšalácie \CS\TeX (rez pre \sl je použitý z CS-CM,
+%% pokiaľ nie je aktívna RS \let\sl=\it na konci riadku);
+%% (odkomentovať len jeden z nasledovných 4 riadkov):
+%\input lmfonts \def\FontType{Latin Modern} % odporúčaná náhrada za CM
+%\input cs-charter \def\FontType{Charter}  \let\sl=\it \VshiftFont=3\ptex
+%\input cs-antt \def\FontType{Antykwa To\-ru\'nska}  \let\sl=\it % *
+%\input cs-polta \def\FontType{Antykwa Pó\l taw\-skiego}  \let\sl\it % *
+%% * v niektorých systémoch je potrebné doinštalovať tieto fonty do TeXLive
+%% (napr. balík texlive-fonts-extra pre Debian/Ubuntu)
+
+%% Nastavenie formátu obrázkov (png farebný/png šedý/eps)
+%\def\ObrPdf{0}
+%\def\ObrPdf{1} % zakomentovať riadok pre použitie farebných png obrázkov
+%%\def\ObrPdf{2} \input epsf % odkomentovať riadok pre výstup do dvi (už nie
+                             % je potrebné, príslušné makrá si to nastavia)
+
+%% Nastavenie grafických súborov pre logo Zlatý fond SME
+%\def\LogoZfSMEbc{zlaty_fond.png} % veľké farebné logo ZfSME pre PDF výstup
+%\def\LogoZfSMEbg{zlaty_fond-g.png} % veľké č/b logo ZfSME pre PDF výstup
+%\def\LogoZfSMEbe{zlaty_fond.eps} % veľké farebné logo ZfSME pre DVI výstup
+%\def\LogoZfSMEsc{zlaty_fond_maly.png} % malé farebné logo ZfSME päty strany
+%\def\LogoZfSMEsg{zlaty_fond_maly-g.png} % malé č/b logo ZfSME päty strany
+
+%% Nastavenie zobrazenia loga Zlatý fond SME v strede päty strany:
+%\def\LogoZF{-1} % namiesto loga čísla strán v strede päty (pre e-book)
+%\def\LogoZF{0} % bez zobrazenia loga
+%\def\LogoZF{1} % zobarzenie textu loga
+%\def\LogoZF{2} % zobrazenie grafického loga (len pre výstup do pdf)
+%\def\ZfSME{{\rm Zlatý fond SME}} % definovanie textu a formátu loga
+
+%% Nastavenie tlače záhlavia strany:
+%\def\ZahlavieTlac{0} 
+%\def\ZahlavieTlac{1} % netlačí sa po zakomentovaní riadku
+
+%% Potlačenie tlače záhlavia a päty strany na prázdnych stranách:
+%\def\EmptyHLFL{0} % tlačí sa po odkomentovaní riadku (neodporúča sa)
+
+%% Nastavenie hlavičky pre motto:
+%\def\MottoH{Motto:} % zobrazí sa v hlavičke motta po odkomentovaní
+
+%% Zapnutie automatického číslovania kapitol a pod/sekcií po odkomentovaní
+%\def\NoNum{0} % nastaví sa po odkomentovaní riadku
+
+%% Zapnutie linkov na strany pre index po odkomentovaní
+%\def\IndexLink{1}
+%% Zapnutie delenia podľa začiatočného písmena pre index po odkomentovaní
+%\def\IndexChar{1} 
+
+%% Nastavenie formátu zlomku:
+%\def\FRformat{0} % formát zlomkovej čiary  /
+%\def\FRformat{1} % formát zlomkovej čiary ---
+
+%% Nastavenie minimálnej veľkosti šírky strany, pri ktorej sa bude text
+%% zarovnávať do bloku bez zväčšenia medzier:
+%\def\MinHSize{100mm}
+%\emergencystretch=2em % nastavenie väčších medzier bez podmienky \MinHSize
+%% Nastavenie minimálnej veľkosti šírky strany, pri ktorej sa bude text
+%% zarovnávať do bloku (pri užšej strane bude text zarovnaný vľavo):
+%\def\MinHsize{80mm}
+
+%% Nastavenie zarovnania vľavo pre sekciu a popodsekciu:
+%\def\SecLeft{0}
+%\def\SecLeft{1} % zarovnanie pod/pod/sekcie do bloku po zakomentovaní riadku 
+
+%% Nastavenie min. veľkosti ľavého + pravého okraja pre závesnú interpunkciu:
+%\def\MinOkraj{9cm} % odkomentovať pre vypnutie aj pre knižné formáty
+
+%% Doplnenie veľkosti strán/formátov pre A6 a e-booky:
+%\sdef{pgs:a6}{(105,148)mm} 
+%\sdef{pgs:eb}{(96,156)mm}  \sdef{pgs:ebr}{(96,96)mm}
+%\sdef{pgs:ebsr}{(78,78)mm} % 78mm je najmenší rozmer pre tabuľku Miery a váhy
+%\sdef{pgs:názov}{(<šírka>,<výška>)} % vlastný formát
+%% Nastavenie základnej veľkosti použitých fontov a veľkosti strany,  po zako-
+%% mentovaní všetkých riadkov v tejto časti sa použije nastavenie pre csplain:
+%% strana veľkosti A4, okraje 2,54 cm, veľkosť fontu 10 pt, riadkovanie 12 pt.
+%% Font veľkosti 11 pt, riadkovanie 12,5 pt, vhodné pre väčšiu veľkosť strany:
+%\typosize[11/12.5] \VshiftFont=1.25\VshiftFont
+%\margins/2 a4 (20,37,27,52)mm % formát A4, P/Ľ zrkadlo, pre a=1/4 šírky strany
+%\margins/2 a4 (17,30,24,42)mm % formát A4, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%\margins/1 b5 (24,24,24,24)mm % nastavenie formátu B5 a všetky okraje na 24mm
+%\margins/2 b5 (14,26,20,35)mm % formát B5, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%\margins/1 a5 (18,18,18,18)mm % nastavenie formátu A5 a všetky okraje na 18mm
+%\margins/2 a5 (14,22,18,28)mm % formát A5, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%% Nastavenia strany pre e-book (zariadenia formátu A6, alebo vlastný formát)
+%\margins/1 a6 (3,3,3,11)mm % nastavenie formátu A6, okraje na 3mm, spodný 11mm
+                            % (zobrazí sa aj číslo strany v strede päty)
+%\margins/1 eb (3,3,3,11)mm % nastavenie formátu na ebook, okraje na 3 a 11mm 
+                            % (zobrazí sa aj číslo strany v strede päty)
+%\margins/1 ebsr (1,1,1,1)mm %nastavenie formátu na ebook, všetky okraje na 1mm
+                            %(v tomto prípade sa nebudú zobrazovať čísla strán)
+
+%% Posun titulu na titulnej strane na cca zlatý stred
+%\def\TitSkip{.05} % prednastavená hodnota je 0,1 výšky strany
+%\ifdim\vsize < \MinHsize % len pre ebsr, už musí byť známa veľkosť \vsize
+%\def\TitSkip{-.1} % odkomentovať len pre viac mien, alebo dlhý názov
+%\fi
+
+%% Načítanie vlastných makier pre Zlatý fond Sme:
+%\ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
+%\input \ZFroot ZfSME
+%% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
+%\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
+%\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
+
+%% Nastavenie informácií o titule a autorovi; v prípade dlhého názvu alebo mena
+%% je možné použiť \nl na oddelenie riadkov v parametri \Titul a \Autor napr.
+%% \def\Autor{Meno \nl Priezvisko}
+%\def\Titul{Titul}
+%\def\Autor{Meno Priezvisko}
+%% Nastavenie informácií v PDF - viď TPP, strany 94 až 95:
+%\input pdfuni % umožní vkladať PDF informácie v kódovaní UTF-16BE Unicode
+%\pdfunidef\tmp{\Autor}    \pdfinfo{/Author (\tmp)}
+%\pdfunidef\tmp{\Titul}    \pdfinfo{/Title (\tmp)}
+
+%%% Vlastné makrá (začínajú sa obyčajne veľkým písmenom) %%%
+
+% V prípade že sa nepoužíva TeXonWeb -- https://tex.mendelu.cz pomocou
+%\input TeXonWeb.tex % je potrebné definovať makro \ToWp :
+\ifx\ToWp\undefined \def\ToWp{} \fi
+
+% Pre staršie verzie CSTeX nemusí byť \elq definované
+\ifx\elq\undefined \chardef \elq 96 \fi
+
+% Prednastavené hodnoty, pokiaľ neboli definované v konfigurácii:
+\ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
+\ifx\ZFbin\undefined \def\ZFbin{} \fi % ak nie je iná cesta k zfsme-rtf2tex
+\ifx\FontType\undefined % definícia pokračuje na nasledujúcom riadku:
+\def\FontType{Computer Modern vo variante \CS-font} \let\CMCS=\FontType \fi
+\ifx\IfCapInsert\undefined \def\IfCapInsert{0} \fi
+\ifx\CapNumLines\undefined \def\CapNumLines{2} \fi
+\ifx\Capprefix\undefined \def\Capprefix{}      \fi
+\ifx\ObrPdf\undefined \def\ObrPdf{0}\fi
+\ifx\LogoZF\undefined \def\LogoZF{0}\fi
+\ifx\LogoZfSMEbc\undefined \def\LogoZfSMEbc{zlaty_fond.png}        \fi
+\ifx\LogoZfSMEbg\undefined \def\LogoZfSMEbg{zlaty_fond-g.png}      \fi
+\ifx\LogoZfSMEbe\undefined \def\LogoZfSMEbe{zlaty_fond.eps}        \fi
+\ifx\LogoZfSMEsc\undefined \def\LogoZfSMEsc{zlaty_fond_maly.png}   \fi
+\ifx\LogoZfSMEsg\undefined \def\LogoZfSMEsg{zlaty_fond_maly-g.png} \fi
+\ifx\ZfSME\undefined \def\ZfSME{{\it Zlatý fond SME}}\fi
+\ifx\ZahlavieTlac\undefined \def\ZahlavieTlac{0}\fi
+\ifx\EmptyHLFL\undefined \def\EmptyHLFL{1}\fi
+\ifx\FRformat\undefined \def\FRformat{0}\fi
+\ifx\MinHSize\undefined \def\MinHSize{100mm}\fi
+\ifx\MinHsize\undefined \def\MinHsize{80mm}\fi
+\ifx\SecLeft\undefined \def\SecLeft{0}\fi
+\ifx\MinOkraj\undefined \def\MinOkraj{9mm}\fi
+\ifx\TitSkip\undefined \def\TitSkip{.1}\fi
+\ifx\NoNum\undefined \def\NoNum{1}\fi % potlačenie číslovania kapitol a sekcií
+\ifx\MottoH\undefined \def\MottoH{}\fi
+\ifx\MfT\undefined \let\MfT=\it\fi % formát pre text \Motto aj \Vers
+\ifx\MfA\undefined \let\MfA=\sl\fi % fotmát pre autora v \Motto
+\ifx\IndexChar\undefined \def\IndexChar{0}\fi
+\ifx\IndexLink\undefined \def\IndexLink{0}\fi
+\ifx\Titul\undefined \def\Titul{Titul}\fi
+\ifx\Autor\undefined \def\Autor{Autor}\fi
+\ifx\ChapRow\undefinned\def\ChapRow{0}\fi
+\ifx\SecRow\undefinned\def\SecRow{0}\fi
+\ifx\SeccRow\undefinned\def\SeccRow{0}\fi
+\ifx\KindleHR\undefined\def\KindleHR{}\fi
+\ifx\RiadkovyRegister\undefined \def\RiadkovyRegister{0}\fi
+\ifx\SmallSkip\undefined \let\SmallSkip=\smallskip\fi
+\ifx\MedSkip\undefined \let\MedSkip=\medskip\fi
+\ifnum\LogoZF<0 \def\RiadkovyRegister{0}\fi    % RR len pre tlačové formáty
+\isdefined{ptex }\iftrue\else\newdimen\ptex\fi % ak rozmer \ptex nie je
+                                               % definovaný v konfigurácii 
+
+\ifnum\RiadkovyRegister = 1 % TBN, str. 114
+\bigskipamount=12pt 
+\medskipamount=6pt
+\raggedbottom
+\let\SmallSkip=\bigskip
+\let\MedSkip=\bigskip
+\def\SecLeft{1}
+\fi
+
+% Definovanie makier pre logo METAFONT a XeTeX
+\font\logo=logo10 %scaled\magstephalf
+\font\logosl=logosl10 %scaled\magstephalf
+\regfont\logo % Umožňuje automatické zväčšovanie písma logo v texte
+% font logo nemá znak -, preto sa používa \discretionary{\rm -}{}{}:
+\def\mf{{\logo META\discretionary{\rm -}{}{}FONT}} % logo METAFONT
+\def\mfsl{{\logosl META\discretionary{\rm -}{}{}FONT}} % sklonená verzia 
+% \reflectbox pre pdfTeX -- viď použitie OPmac makra \pdfscale, TPP str. 100 
+\def\reflectbox#1{\phantom{#1}\pdfsave \pdfscale{-1}{1}\rlap{#1}\pdfrestore}
+% veľkosti kernov pre logo \XeTeX viď 
+% https://tex.stackexchange.com/questions/558031/xetex-logo-with-reversed-e
+\def\XeTeX{X\lower.5ex\hbox{\kern-.125em\reflectbox{E}}\kern-.1667em\TeX}
+
+% Odstránkovanie bez podmienok:
+\def\NewPage{\ifdim\pagetotal < .5\vsize \null\fi \vfill\eject} % TBN str. 240
+% Odstrákovanie len v prípade, že číslo strany je: 
+% párne:
+\def\NewPageIfEven{{\ifodd\pageno \else \ifnum\EmptyHLFL=1
+                    \footline={\hfil} \headline={\hfil} \fi
+                    \NewPage \fi }}
+% nepárne:
+\def\NewPageIfOdd{{\ifodd\pageno \ifnum\EmptyHLFL=1
+                   \footline={\hfil} \headline={\hfil} \fi
+                   \NewPage \fi }}
+
+% Kontrola nevhodnej kombinácie výstupu do PDF a \ObrPdf
+\ifpdftex \ifnum\ObrPdf=1 \else \def\ObrPdf{0} \fi
+\else \ifnum\ObrPdf=2 \else \def\ObrPdf{2} \input epsf \fi\fi
+% Kontrola nevhodnej kombinácie \LogoZF a \ObrPdf
+\ifnum\LogoZF=2 \ifnum\ObrPdf=2 \def\LogoZF{1} \fi\fi
+% Kontrola prítomnosti súborov s malým logom ZfSME
+% (ak nie sú, použije sa textové logo ZfSME)
+\def\InsPicFooter#1{\openin\testin=\ZFroot #1
+\ifeof\testin\opwarning{The ‘#1’ file doesn’t exist..}%
+\ifnum\LogoZF=2 \def\LogoZF{1} \fi \else
+\closein\testin\pdfximage height24pt {\ZFroot #1}\fi}
+\ifnum\ObrPdf = 0 \InsPicFooter{\LogoZfSMEsc}\fi % načítanie farebného loga
+\ifnum\ObrPdf = 1 \InsPicFooter{\LogoZfSMEsg}\fi % načítanie č/b loga
+
+% Nastavenie stránkovania a pdf záložiek pre e-booky
+\ifnum\LogoZF = -1 % pre e-booky sa negenerujú prázdne strany
+\def\NewPage{\vfill\eject} % bez \null, po \endmulti môže vytvoriť stranu 
+\def\NewPageIfEven{} \def\NewPageIfOdd{}
+\def\Outlines{\insertoutline{Obsah} \outlines{0}} % záložky v pdf pre e-booky
+\else \def\Outlines{} \fi
+% Nastavenie formátu päty bežnej strany:
+\def\PageNumbersRoman{% vhodné pre obsah a úvodné strany
+\footline={\hss\tenrm\folio\hss}}
+\ifnum \LogoZF = -1
+% verzia bez loga, s umiesnením č. strany v strede päty (vhodné pre e-book)
+\let\PageNumbers=\PageNumbersRoman
+% nasledovné rozloženia sú vhodné pre obojstrannú tlač:
+\else \ifnum \LogoZF = 0
+% verzia bez loga, s umiestnením č. strany (vľavo pre párnu a vpravo 
+% pre nepárnu stranu (hfill je silnejšia "pružina" ako hfil):
+\def\PageNumbers{%
+\footline={\tenrm \ifodd\pageno \hfill \fi \folio \hfil}}
+\else \ifnum \LogoZF = 1
+% verzia s nápisom Zlatý fond SME v strede päty strany
+\def\PageNumbers{%
+\footline={\tenrm \ifodd\pageno \hphantom{\folio}\hfil\ZfSME\unskip\hfil \folio
+                        \else
+                        \folio \hfil \ZfSME\unskip\hfil\hphantom{\folio}\fi}}
+\else \ifnum \LogoZF = 2
+% verzia s obrázkom Zlatý fond SME v strede päty strany
+\mathchardef\ZfSMEi=\pdflastximage % TPP, str. 101
+\def\PageNumbers{%
+\footline={\tenrm \ifodd\pageno 
+            \hphantom{\folio}\hfil
+            \lower12pt\hbox{\pdfrefximage\ZfSMEi}\unskip\hfil\folio \else
+            \folio\hfil\lower12pt\hbox{\pdfrefximage\ZfSMEi}\unskip\hfil
+            \hphantom{\folio}\fi}}
+\fi\fi\fi\fi
+
+% Formáty pre zarovnanie vľavo \fL, vpravo fR, na stred fC
+% a do bloku s posledným riadkom vycentrovaným fX a \fXi (s odsadením) 
+% viď https://petr.olsak.net/opmac-tricks.html#tabpmod
+\def\fL{\rightskip=0pt plus 1fill}
+\def\fR{\leftskip=0pt plus 1fill}
+\def\fC{\leftskip=0pt plus 1fill \rightskip=0pt plus 1fill}
+\def\fX{\leftskip=0pt plus1fil %\iindent plus1fil
+        \rightskip=0pt plus-1fil %\iindent plus-1fil
+        \parfillskip=0pt plus2fil}
+\def\fXi{\leftskip=\iindent plus1fil
+         \rightskip=\iindent plus-1fil
+         \parfillskip=0pt plus2fil}
+
+
+%%% [tbn, str. 113] Vynechání místa se zachovaným řádkováním i na zlomu stran
+\def\skiplines#1{\par\hbox{}\nobreak\vskip-\baselineskip 
+     \vskip#1\baselineskip}
+%%% [tbn, str. 115] Umístí libovolně velký box do řádkové osnovy
+\def\vycentruj{\afterassignment\uvnitrboxu \setbox0=} 
+\def\uvnitrboxu{\aftergroup\usadbox}    
+\def\usadbox{\par \dimen0=\ht0 \advance\dimen0 by \dp0
+   \divide \dimen0 by\baselineskip
+   \multiply \dimen0 by\baselineskip
+   \advance\dimen0 by\baselineskip
+   \vbox to0pt{\kern-8.5pt \vbox to\dimen0{\vfil\box0\vfil}\vss}
+   \nobreak \advance\dimen0 by-2\baselineskip
+   \vskip \dimen0 \hbox{}}
+
+
+% Tlač pod/sekcie doplnená o zarovnanie textu vľavo (\fL)
+\ifnum \SecLeft = 1
+  \ifnum\RiadkovyRegister=0
+  \def\printsec#1{\par \norempenalty-400 \bigskip
+    {\fL \secfont \noindent \dotocnum
+    {\thetocnum\quad}#1\nbpar}%
+    \insertmark{#1}%
+    \nobreak \remskip\medskipamount \firstnoindent
+  }%
+  \else
+  \def\printsec#1{\par \norempenalty-400 \bigskip
+    \vycentruj\vbox{%
+    {\fL \secfont \noindent \dotocnum
+    {\thetocnum\quad}#1\nbpar}%
+    \nobreak \remskip.6\bigskipamount}%
+    \insertmark{#1}\firstnoindent
+  }% 
+  \fi
+  \ifnum\RiadkovyRegister=0
+  \def\printsecc#1{\par \norempenalty-200 \medskip
+    {\fL \seccfont \noindent \dotocnum
+    {\thetocnum\quad}#1\nbpar}%
+    \nobreak \remskip\medskipamount \firstnoindent
+  }%
+  \else
+  \def\printsecc#1{\par \norempenalty-200 \bigskip
+    \vycentruj\vbox{%
+    {\fL \seccfont \noindent \dotocnum
+    {\thetocnum\quad}#1\nbpar}%
+    \nobreak \remskip\medskipamount}%
+    \firstnoindent
+  }%
+  \fi
+\fi
+
+
+% Vytvorenie úrovne vyznačovania pre pod-pod-sekciu, text zarovnaný vľavo
+% (bez číslovania a bez vytvárania záznamu pre obsah)
+% viď https://petr.olsak.net/opmac-tricks.html#seccc
+\ifnum \RiadkovyRegister = 1
+\def\seccc#1\par{\skiplines{.7} \noindent
+{\ifnum \SecLeft = 1 \fL \fi \bf #1\nbpar}%
+\nobreak\vskip.3\baselineskip  \firstnoindent}
+\else
+\def\seccc#1\par{\norempenalty-100 \medskip \noindent
+{\ifnum \SecLeft = 1 \fL \fi \bf #1\nbpar}%
+\nobreak \smallskip \firstnoindent}
+\fi
+
+% Zmena nastavenia zarovnania riadkov textu podľa šírky strany
+\ifdim\hsize < \MinHsize 
+% bežný text bude zarovnaný vľavo, pokiaľ nie je nastavená väčšia rozťažnosť
+\ifdim\emergencystretch>0pt \else  \rightskip = 0pt plus3em \fi
+\else\ifdim\hsize < \MinHSize
+\ifdim\emergencystretch>0pt \else
+\emergencystretch=2em % bežný text zarovnaný do bloku s väčšou rozťažnosťou
+\fi\fi\fi
+
+% Formát pre autora na titulnej strane
+\def\authorfont{\typobase\typoscale[\magstep4/\magstep4]\it}
+\def\AuthorF#1{\nobreak\bigskip
+{\fC\authorfont \noindent #1\par}%
+}
+
+% Formát pre zoznam digitalizátorov
+\newdimen\rozmerD % rozmer stĺpca zoznamu digitalizátorov
+\def\Digitalizator#1#2{\setbox0=\hbox{#1}% pre šírku textu 1. parametra
+\rozmerD=\hsize
+\advance \rozmerD by -\wd0 % zmenšené o šírku textu 1. stĺpca
+\advance \rozmerD by -1em % zmenšené o cca medzeru medzi stĺpcami
+\table{lp{\rozmerD\fL}}
+{\kern-.5em#1 & #2 \cr}\bigskip} % \kern-.5em posun textu 1. stĺpca k okraju
+                                 % tabuľky (potlačenie medzery) 
+
+% Formát pre Copyright
+\def\CopyR#1{\noindent{\fC #1\nbpar}}
+
+% Formát pre Creative Commons License vycentruje poslený riadok, viď \fX
+\def\CCL#1#2{\medskip\noindent #1 \par\nobreak
+\noindent{\fX #2\par}
+\medskip\noindent}
+
+\def\ZFurl{% Vytlačí url autorských práv pre Zlatý fond SME
+\noindent{\fC
+\url{http://zlatyfond.sme.sk/dokument/autorske-prava/}\par}}
+
+\def\TypoInfo{% Vytlačí info o TeX a použitom fonte
+\ifdim\vsize > 110mm \vskip 48pt\noindent \else \medskip\noindent \fi
+Sadzba programom \ulink[https://ctan.org]{\TeX} písmom \FontType .}
+
+% Vytvorenie formátu pre jazykovú úpravu, text zarovnaný vľavo
+\def\JazykUprava#1\par{\norempenalty-100 \bigskip \noindent
+{\ifnum \SecLeft = 1 \fL \fi
+\it #1\nbpar}\nobreak \bigskip \firstnoindent} 
+
+% Formát pre Bibliogafické poznámky
+\ifnum \RiadkovyRegister = 1
+\def\BibPoznamky#1\par{\norempenalty-100 \skiplines{.7} \noindent
+{\fC\bf #1\nbpar}%
+\nobreak\vskip.3\baselineskip  \firstnoindent}
+\else
+\def\BibPoznamky#1\par{\norempenalty-100 \medskip \noindent
+{\fC\bf #1\nbpar}%
+\nobreak \smallskip \firstnoindent}
+\fi
+
+% Formát pre perex za názvom kapitoly vycentruje poslený riadok, viď TBN s. 234
+% v prípade užšej strany ako \MinHsize bude perex zarovnaný vľavo
+% po odkomentovaní %\catcode`\~=10 už nebude ~ nedeliteľná  medzera
+\ifdim\hsize < \MinHsize %\catcode`\~=10 
+\long\def\Perex#1#2{\noindent{\it #1\par}\medskip\noindent
+{\sl #2}\medskip} \else
+\ifnum \RiadkovyRegister = 1
+\long\def\Perex#1#2{\noindent{\fX\it #1\par}\medskip\noindent
+{\sl #2}\vskip-\medskipamount\null}\else
+\long\def\Perex#1#2{\noindent{\fX\it #1\par}\medskip\noindent
+{\sl #2}\medskip}\fi
+\fi
+
+% Formát pre motto za názvom kapitoly 
+% v prípade užšej strany ako \MinHsize bude motto zarovnané vľavo
+\long\def\Motto#1#2{{\noindent\fL\sl \MottoH \par}
+{\let\NoBr=\nobreak \Vers #1\par}{\noindent\fL\MfA #2\par}\MedSkip}
+
+% Formát pre tabuľku Miery a váhy v závislosti od šírky strany
+\def\TabMaV#1{%
+\ifdim\hsize < \MinHsize 
+\table{llp{42mm\fL}}{#1} %strana šírky 78 mm
+\else\ifdim\hsize < \MinHSize 
+\table{llp{52mm\fL}}{#1} %strana šírky 96 mm
+\else \smallskip
+\table{lll}{#1} % strana väčšej šírky 
+\fi\fi }
+
+% Formát pre položku zoznamu \item obklopenú medzerami
+\ifnum \RiadkovyRegister = 1
+\def\Itemm#1\par{\skiplines{.5}\item #1\nobreak\medskip}
+\else
+\def\Itemm#1\par{\smallskip\item #1\nobreak\smallskip}
+\fi
+
+
+% Oddeľovač hviezdička medzi odstavcami (2/2025 zmena smallskip->medskip):
+\def\Hviezdicka{\nobreak\skiplines{.5}\centerline{*}\medskip}
+
+% Slovo Koniec a jeho formát pre celý riadok na konci kapitol
+\def\Koniec#1\par{\nobreak\MedSkip\noindent{\it Koniec\ #1}}
+
+
+% Formát pre verše
+\def\nnarrower{\narrower\narrower}
+\def\Vers#1\par{\ifdim\hsize < \MinHsize % pre formát ebsr bez odsadenia
+{\removelastskip\smallskip\noindent
+                 \MfT #1\smallskip}\else
+{\ifx\NoBr\undefined \let\NoBr=\allowbreak \fi
+    \removelastskip\SmallSkip\noindent\nnarrower\fL
+                 \MfT #1\par\NoBr\SmallSkip}\fi
+                }
+
+% Definícia znaku stupeň s medzerou pre použitie mimo matematického módu 
+\def\Deg{$\,^{\circ}\kern-.1em$}
+% Definícia znaku stupeň bez medzery pre použitie mimo matematického módu 
+\def\DEG{$^{\circ}$}
+
+% Definícia zlomku pre použitie mimo matematického módu (\FR 1/2 je 1/2)
+% Pre zlomkovú čiaru sa používa \exfractionsolidus z balíka exchars.tex
+\input exchars
+\def\FR#1/#2 {{\ifnum\FRformat=0 
+\def\tmp{Charter}\ifx\FontType\tmp
+$^{#1}\!/\!_{#2}$\else % pôvodná, typograficky menej vhodná definícia
+\def\tmp{Antykwa To\-ru\'nska}\ifx\FontType\tmp
+$^{#1}\!/\!_{#2}$\else % pôvodná, typograficky menej vhodná definícia
+\def\tmp{Antykwa Pó\l taw\-skiego}\ifx\FontType\tmp
+$^{#1}\!/\!_{#2}$\else % pôvodná, typograficky menej vhodná definícia
+\typoscale[860/]%
+% doplnenie zmeny formátovania pre Palatino, LM a CS-CM
+\def\tmp{Palatino}\ifx\FontType\tmp
+\hbox{$^{#1}\!$}{\typoscale[1163/]\exfractionsolidus}%
+\hbox{$\scriptstyle{#2}\,$}%
+\else
+\def\tmp{Latin Modern}\ifx\FontType\tmp 
+\hbox{$\!^{#1}\!$}{\typoscale[1163/]\exfractionsolidus}%
+\hbox{$\!\scriptstyle{#2}\,$}%
+\else
+\ifx\FontType\CMCS 
+\hbox{$^{#1}\!$}{\typoscale[1163/]\exfractionsolidus}%
+\hbox{$\!\scriptstyle{#2}\,$}%
+\else
+\hbox{$^{#1}$}{\typoscale[1163/]\exfractionsolidus}\hbox{$\scriptstyle{#2}$}%
+\fi\fi\fi\fi\fi\fi
+\else
+$\,{#1\over#2}\,$\fi}}
+% Prepínač formátu zlomkov
+\def\FRswitch{\ifnum\FRformat=0\def\FRformat{1}\else\def\FRformat{0}\fi}
+
+
+% Polovičná medzera voči \, (t. j. polovica \thinspace)
+\def\:{\ifmmode\mkern2mu\fi }
+% pre niektoré fonty však môže byť definovaná odlišne:
+\def\tmp{Latin Modern} \ifx\FontType\tmp 
+\def\:{\ifmmode{}\fi} \else
+\ifx\FontType\CMCS 
+\def\:{\ifmmode{}\fi} \else
+\def\tmp{Palatino} \ifx\FontType\tmp
+\def\:{\ifmmode\mkern4mu\fi } 
+\fi\fi\fi
+
+% Doplnenie znaku - na začiatok riadku v prípade delenia slov s týmto znakom
+% TBN str. 217 (Řešení 3.)
+\def\={\discretionary{-}{-}{-}}
+
+% Potlačenie číslovania kapitol, sekcií a podsekcií
+% https://petr.olsak.net/opmac-tricks.html#globnonum
+\def\NumOff{\nonum \def\nonumfalse{\pagedepth=\pagedepth}}
+\ifnum\NoNum = 1
+\NumOff
+% Namiesto názvu Kapitola štvotrec na pravej strane (pre nečíslované kapitoly)
+\sdef{mt:chap:sk}{\hfill\vrule height12pt depth2pt width14pt}
+\sdef{mt:chap:cs}{\hfill\vrule height12pt depth2pt width14pt}
+\sdef{mt:chap:en}{\hfill\vrule height12pt depth2pt width14pt}
+\fi
+% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
+%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
+
+% Predefinovanie RS \chap \sec a \secc z OPmac pre písmenné označenie kapitol, 
+% sekcí a podsekcí (napríklad A, B, C. ...) pomocou nových RS \chapnumf,
+% \secnumf a \seccnumf.
+%
+% Použitie: pred označenie kapitoly/sekcie/podsekcie,  kde potrebujeme zmeniť
+% jej formát  alebo číslo,  napísať  \def\chapnumf{p}/secnumf{p}/seccnumf{p},
+% kde p je jedno veľké alebo malé písmeno bez diakritiky ([A-Z] alebo [a-z]),
+% alebo  prirodzené číslo  (zložené len zo znakov [0-9]);  pri zápornom celom
+% čísle sa budú používať  rímske číslice,  ktoré vyjadrujú  absolútnu hodnotu 
+% záporného čísla.  Pre  doplnenie  bodky  za číslom  ako symbolu  pre radovú 
+% číslovku  (často sa  používa  práve pri použití  rímskych číslic)  je možné 
+% nastaviť pomocou \def\ChapRow{1}/SecRow{1}/SeccRow{1}  pre kapitoly/sekcie/
+% /podsekcie a vypnúť pomocou ...{0}.
+%
+\def\Incrmc{1} \def\Decrmc{-1} 
+\def\Incrms{1} \def\Decrms{-1}
+\def\Incrmss{1} \def\Decrmss{-1}
+\def\IfR#1{\ifnum#1<0% TBN s. 43, 365
+\expandafter\uppercase\expandafter{\romannumeral-#1}\else\the#1\fi}
+\def\IfRo#1{\ifnum#1<0% \IfRo sa používa pokiaľ namiesto \the \othe 
+\expandafter\uppercase\expandafter{\romannumeral-#1}{}.\else\othe#1.\fi}
+\newcount\charchap \newcount\charsec \newcount\charsecc
+\def\chapnumf#1{%
+    \ifcat A#1 \def\Incrmc{1} \def\Decrmc{-1}
+               \chapnum=`#1 \advance\chapnum by\Decrmc \charchap=1 \else
+    \ifnum#1 < 0 \def\Incrmc{-1} \def\Decrmc{1} \else
+                 \def\Incrmc{1} \def\Decrmc{-1} \fi
+    \chapnum=#1 \advance\chapnum by\Decrmc \charchap=0 \fi
+}
+\def\secnumf#1{%
+    \ifcat A#1 \def\Incrms{1} \def\Decrms{-1}
+               \secnum=`#1 \advance\secnum by\Decrms \charsec=1 \else
+    \ifnum#1 < 0 \def\Incrms{-1} \def\Decrms{1} \else
+                 \def\Incrms{1} \def\Decrms{-1} \fi
+    \secnum=#1 \advance\secnum by\Decrms \charsec=0 \fi
+}
+\def\seccnumf#1{%
+    \ifcat A#1 \def\Incrmss{1} \def\Decrmss{-1}
+               \seccnum=`#1 \advance\seccnum by\Decrmss \charsecc=1 \else
+    \ifnum#1 < 0 \def\Incrmss{-1} \def\Decrmss{1} \else
+                 \def\Incrmss{1} \def\Decrmss{-1} \fi
+    \seccnum=#1 \advance\seccnum by\Decrmss \charsecc=0 \fi
+}
+% + doplneneie definíce \ChapTitle do makra \chap
+\eoldef\chap#1{\ifnonum\else \global\advance\chapnum by\Incrmc \fi
+  \chaphook {\globaldefs=1 \secnum=0 \seccnum=0 \tnum=0 \fnum=0 \dnum=0%
+             \charsec=0 \charsecc=0 \def\Incrms{1} \def\Decrms{-1}%
+             \def\Incrmss{1} \def\Decrmss{-1}}\relax
+  \ifnum\ChapRow=0 \def\ChRD{} \else \def\ChRD{{}.} \fi
+  \ifnum\charchap=1%
+  \edef\thechapnum{\char\the\chapnum}\let\thetocnum=\thechapnum\else
+  \edef\thechapnum{\IfR{\chapnum}\ChRD}\let\thetocnum=\thechapnum\fi
+  \edef\thesecnum{\IfRo{\chapnum}\IfR{\secnum}}%
+  \def\dotocnumafter{\wtotoc0\bfshape{#1}}%
+  \printchap{#1}\resetnonumnotoc
+  \def\ChapTitle{#1} % doplnené do pôvodnej definície \chap
+}
+% Doplnenie začiatočnej nepárnej strany kapitoly  do makra \printchap
+\def\printchap#1{\null\vfill\supereject
+  \NewPageIfEven
+  \ifnum\RiadkovyRegister = 1
+    {\chapfont \noindent \mtext{chap} \dotocnum{\thetocnum}\par
+    \nobreak\noindent #1\vbox to19pt{\null}\nbpar}\mark{}
+  \else
+    {\chapfont \noindent \mtext{chap} \dotocnum{\thetocnum}\par
+    \nobreak\smallskip\noindent #1\nbpar}\mark{}
+  \fi
+  \nobreak\remskip\bigskipamount \firstnoindent
+}
+\eoldef\sec#1{\ifnonum\else \global\advance\secnum by\Incrms \fi
+   \sechook {\globaldefs=1 \seccnum=0 \tnum=0 \fnum=0 \dnum=0%
+             \charsecc=0 \def\Incrmss{1} \def\Decrmss{-1}}\relax
+   \ifnum\SecRow=0 \def\SRD{} \else \def\SRD{{}.} \fi
+   \ifnum\charchap=1  \ifnum\charsec=1% 
+   \edef\thesecnum{\char\othe\chapnum.\char\the\secnum}%
+   \let\thetocnum=\thesecnum\else
+   \edef\thesecnum{\char\othe\chapnum.\IfR{\secnum}\SRD}
+   \let\thetocnum=\thesecnum\fi
+   \else
+   \ifnum\charsec=1%
+   \edef\thesecnum{\IfRo{\chapnum}\char\the\secnum}
+   \let\thetocnum=\thesecnum\else
+   \edef\thesecnum{\IfRo{\chapnum}\IfR{\secnum}\SRD}%
+   \let\thetocnum=\thesecnum\fi\fi
+   \def\dotocnumafter{\wtotoc1\rm{#1}}%   
+   \printsec{#1}\resetnonumnotoc 
+}
+\eoldef\secc#1{\ifnonum\else \global\advance\seccnum by\Incrmss \fi
+   \secchook {}\relax
+   \ifnum\SeccRow=0 \def\SsRD{} \else \def\SsRD{{}.} \fi  
+   \ifnum\charchap=1%
+   \ifnum\charsec=1 \ifnum\charsecc=1% TBN, s. 47 (podmienka typu A and B)
+   \edef\theseccnum{\char\othe\chapnum.\char\the\secnum.\char\the\seccnum}\else
+   \edef\theseccnum{\char\othe\chapnum.\char\the\secnum.\IfR{\seccnum}\SsRD}%
+   \fi\else
+   \ifnum\charsecc=1%
+   \edef\theseccnum{\char\othe\chapnum.\IfR{\secnum}.\char\the\seccnum}\else
+   \edef\theseccnum{\char\othe\chapnum.\IfR{\secnum}.\IfR{\seccnum}\SsRD}%
+   \fi\fi\else
+   \ifnum\charsec=1 \ifnum\charsecc=1% 
+   \edef\theseccnum{\IfRo{\chapnum}\char\the\secnum.\char\the\seccnum}\else
+   \edef\theseccnum{\IfRo{\chapnum}\char\the\secnum.\IfR{\seccnum}\SsRD}%
+   \fi\else
+   \ifnum\charsecc=1%
+   \edef\theseccnum{\IfRo{\chapnum}\IfRo{\secnum}\char\the\seccnum}\else
+   \edef\theseccnum{\IfRo{\chapnum}\IfRo{\secnum}\IfR{\seccnum}\SsRD}\fi\fi\fi
+   \let\thetocnum=\theseccnum
+   \def\dotocnumafter{\wtotoc2\rm{#1}}%   
+   \printsecc{#1}\resetnonumnotoc 
+}
+
+% Pomocné makrá s dvomi parametrami, ktoré sa použijú podľa podmienky: 
+\def\IfEbook#1#2{%ak je výstupom e-book, použije sa 1.parameter, ak nie 2.
+\ifnum\LogoZF=-1 #1 \else #2 \fi}
+\def\IfHyperlinks#1#2{%ak aktívne hyperlinky, bude 1.parameter, ak nie 2.
+\ifx\link\linkactive #1 \else #2 \fi}
+
+% Pomocné makrá pre nastavenie záhlavia strany (viď TBN, str. 259-260)
+\def\HeadSize{\thefontsize[10]}
+\let\ChapTitle=\null
+\def\HeadRule{\leaders\hrule height3pt depth-2.6pt\hfil} 
+\def\MySpace{0pt} % východzia veľkost medzery medzi textom záhlavia a \HeadRule
+\def\PraveZahlavie{\ifnum\NoNum=1 \else \def\MySpace{3pt}\fi
+                   \HeadRule{\it\kern\MySpace\HeadSize\firstmark
+                   \vphantom{\^Č}}}% 6.2.2025 doplnené \vphantom{\^Č}
+\def\LaveZahlavie{\ifx\ChapTitle\null \else \def\MySpace{4pt}\fi
+                 {\ifx\ChapTitle\firstmark \it \else \sl \fi
+                  \HeadSize\vphantom{\^Č}% 6.2.2025 doplnené \vphantom{\^Č}
+                  \ChapTitle\kern\MySpace \HeadRule}}
+% Makro pre tlač záhlavia \TlacZahlavia na základe parametra \ZahlavieTlac
+\def\TlacZahlavia{\ifnum\ZahlavieTlac = 1
+\headline={\ifodd\pageno \PraveZahlavie \else \LaveZahlavie \fi}\fi}
+
+% Nastavenie vkladania obrázkov rôzneho umiestnenia a rôznych formátov 
+\def\InsPicc#1#2{\openin\testin=\ToWp #1 
+\ifeof\testin\opwarning{The ‘#1’ file doesn’t exist..}\else
+\closein\testin
+\ifx^#2^\tmpdim=.4pt\else\tmpdim=#2\fi % TPP str. 71
+\vbox{\hrule height\tmpdim\hbox{\vrule width\tmpdim
+\inspic\ToWp #1 \vrule width\tmpdim}\hrule height\tmpdim}\fi
+}
+\def\InsPiccR#1#2{\openin\testin=\ZFroot #1
+\ifeof\testin\opwarning{The ‘#1’ file doesn’t exist..}\else
+\closein\testin
+\ifx^#2^\tmpdim=.4pt\else\tmpdim=#2\fi % TPP str. 71
+\vbox{\hrule height\tmpdim\hbox{\vrule width\tmpdim
+\inspic\ZFroot #1 \vrule width\tmpdim}\hrule height\tmpdim}\fi
+}
+\def\InsPice#1#2{\openin\testin=\ToWp #1
+\ifeof\testin\opwarning{The ‘#1’ file doesn’t exist..}\else
+\closein\testin
+\ifx^#2^\tmpdim=.4pt\else\tmpdim=#2\fi % TPP str. 71
+\vbox{\hrule height\tmpdim\hbox{\vrule width\tmpdim
+\epsfbox{\ToWp #1}\vrule width\tmpdim}\hrule height\tmpdim}\fi
+}
+\def\InsPiceR#1#2{\openin\testin=\ZFroot #1
+\ifeof\testin\opwarning{The ‘#1’ file doesn’t exist..}\else
+\closein\testin
+\ifx^#2^\tmpdim=.4pt\else\tmpdim=#2\fi % TPP str. 71
+\vbox{\hrule height\tmpdim\hbox{\vrule width\tmpdim
+\epsfbox{\ZFroot #1}\vrule width\tmpdim}\hrule height\tmpdim}\fi
+}
+% Použitie rôznych verzií formátu obrázkov na základe parametra \ObrPdf
+\def\FigF#1#2#3#4#5#6{%% vloží obrázok zarovnaný na ľavý okraj bez medzier
+\ifnum\ObrPdf = 2      % vloží eps obrázok (pre dvi výstup)
+\leftline{#6\InsPice{#5}{0pt}}
+\else
+\ifnum\ObrPdf = 1      % vloží čiernobiely obrázok (png, jpg, pdf)
+\leftline{#4\InsPicc{#3}{0pt}}
+\else                  % vloží farebný obrázok (png, jpg, pdf)
+\leftline{#2\InsPicc{#1}{0pt}}%
+\fi\fi
+}
+\def\FigFM#1#2#3#4#5#6{%% vloží obrázok zarovnaný na ľavý okraj s medzerami
+\medskip
+\ifnum\ObrPdf = 2       % vloží eps obrázok (pre dvi výstup)
+\leftline{#6\InsPice{#5}{0pt}}
+\else
+\ifnum\ObrPdf = 1       % vloží čiernobiely obrázok (png, jpg, pdf)
+\leftline{#4\InsPicc{#3}{0pt}}
+\else                   % vloží farebný obrázok (png, jpg, pdf)
+\leftline{#2\InsPicc{#1}{0pt}}
+\fi\fi\medskip
+}
+\def\FigFC#1#2#3#4#5#6{%% vloží obrázok zarovnaný na stred šírky strany
+\ifnum\ObrPdf = 2       % vloží eps obrázok (pre dvi výstup)
+\centerline{#6\InsPice{#5}{0pt}}
+\else
+\ifnum\ObrPdf = 1       % vloží čiernobiely obrázok (png, jpg, pdf)
+\centerline{#4\InsPicc{#3}{0pt}}
+\else                   % vloží farebný obrázok (png, jpg, pdf)
+\centerline{#2\InsPicc{#1}{0pt}}
+\fi\fi
+}
+\def\FigFCframe#1#2#3#4#5#6#7#8#9{%% vloží obrázok s orámovaním na stred strany
+\ifnum\ObrPdf = 2                  % vloží eps obrázok (pre dvi výstup)
+\centerline{#8\InsPice{#7}{#9}}
+\else
+\ifnum\ObrPdf = 1                  % vloží čiernobiely obrázok (png, jpg, pdf)
+\centerline{#5\InsPicc{#4}{#6}}
+\else                              % vloží farebný obrázok (png, jpg, pdf)
+\centerline{#2\InsPicc{#1}{#3}}
+\fi\fi
+}
+\def\FigFCroot#1#2#3#4#5#6{%% vloží obrázok z ZFroot zarovnaný na stred strany
+\ifnum\ObrPdf = 2           % vloží eps obrázok (pre dvi výstup)
+\centerline{#6\InsPiceR{#5}{0pt}}
+\else
+\ifnum\ObrPdf = 1           % vloží čiernobiely obrázok (png, jpg, pdf)
+\centerline{#4\InsPiccR{#3}{0pt}}
+\else                       % vloží farebný obrázok (png, jpg, pdf)
+\centerline{#2\InsPiccR{#1}{0pt}}
+\fi\fi
+}
+
+% Generovanie okrajov strán (hoffset, voffset) pre patitul a titul, musia
+% byť nazávislé od okrajov pre ostatné strany
+\ifdim\pgwidth=0pt \pgwidth=210mm \pgheight=297mm \fi % nastaví sa na A4
+\newdimen\HoffsetTitul \HoffsetTitul=\pgwidth
+\advance\HoffsetTitul by -\hsize
+\divide\HoffsetTitul  by 2 % rovnaký pravý a ľavý okraj (ako ich priemer)
+\advance\HoffsetTitul by -1in
+\newdimen\VoffsetTitul \newdimen\VsizeTitul \VsizeTitul=\vsize
+\ifdim\pgwidth>176mm \VoffsetTitul=1in  \VsizeTitul=246mm \else % pre A4
+\ifdim\pgwidth>148mm \VoffsetTitul=24mm \VsizeTitul=202mm \else % pre B5
+\ifdim\pgwidth>105mm \VoffsetTitul=18mm \VsizeTitul=174mm \else % pre A5
+\ifdim\pgwidth>78mm  \VoffsetTitul=3mm                    \else % pre eb, ebr
+\ifdim\pgwidth=78mm  \VoffsetTitul=1mm                          % pre ebsr
+\fi\fi\fi\fi\fi
+\advance\VoffsetTitul by -1in
+
+\def\PatitulStrana{% Vytvorenie strany pre patitul (1. generovaná strana)
+\nopagenumbers % patitul až po obsah bez číslovaných strán
+{\hoffset=\HoffsetTitul \voffset=\VoffsetTitul \vsize=\VsizeTitul
+\ifnum\pageno>0 \pageno=-1 \fi % od patitulu až po obsah budú záporné strany
+\KindleHR
+\null\vskip .1\vsize % vertikálny posun o 0,1 výšky strany
+\noindent
+{\fC{\rm \Autor: {\it \Titul}}\par}
+\bigskip
+\FigFCroot%
+{\LogoZfSMEbc}{}% farebná verzia (png)
+{\LogoZfSMEbg}{}% č/b verzia (png)
+{\LogoZfSMEbe}{}% verzia pre DVI=>PS (eps)
+\ifnum\pageno=-1 \NewPage\NewPageIfEven \else \NewPage\NewPageIfOdd \fi
+}}
+
+\def\TitSkipMinus{% ak prvý (expandovaný) token \TitSkip nie je . potom je -
+\if .\TitSkip \else -\fi}
+
+\def\TitulMedzera{%
+\ifdim\vsize > 100mm       % v prípade strany vyššej ako 100 mm,
+\null\vskip \TitSkip\vsize % vertikálny posun o \TitSkip * výška strany 
+\else \if -\TitSkipMinus   % alebo v prípade zápornej hodnoty \TitSkip,
+\null\vskip \TitSkip\vsize % vertikálny posun o \TitSkip * výška strany
+\fi\fi} 		   % (na cca zlatý rez)  
+
+\def\TitulStrana{% Vytvorenie strany pre titul (2. generovaná strana)
+\nopagenumbers % titulá strana až po obsah bez číslovaných strán
+\ifnum\pageno>0 \pageno=-1 \fi % od titulu až po obsah budú záporné strany 
+{\hoffset=\HoffsetTitul \voffset=\VoffsetTitul \vsize=\VsizeTitul
+\KindleHR
+\TitulMedzera    		% posun titulu na cca zlatý rez
+\csname\string\tit:M\endcsname{\Titul} % opmac-d.pdf, str. 16
+\AuthorF \Autor\par
+\ifnum\pageno=-1 \NewPage\NewPageIfEven \else \NewPage\NewPageIfOdd \fi
+}}
+
+% Závesná interpunkcia -- viď TPP str. 110
+\newcount\tmpnum \newdimen\tmpdim % deklarácie z OPmac
+\def\setcharcode#1#2#3{% #1: \whatcode, #2: char, #3: factor
+    \setcharcodeforfont \tenrm #1#2{#3}%
+    \setcharcodeforfont \tenbf #1#2{#3}%
+    \setcharcodeforfont \tenit #1#2{#3}%
+    \setcharcodeforfont \tenbi #1#2{#3}%
+}
+\def\setcharcodeforfont#1#2#3#4{%
+    \setbox0=\hbox{#1#3}\tmpdim=#4\wd0 \tmpnum=\tmpdim
+    \tmpdim=\fontdimen6#1% velikost 1em
+    \divide\tmpdim by50 \multiply\tmpnum by20 \divide\tmpnum by\tmpdim
+    #2#1\ifcat#3\clqq\else\expandafter`\fi#3=\tmpnum
+}
+\def\ZavesnaIterpunkcia{
+    \chardef\hyph=\hyphenchar\font
+    \setcharcode \lpcode\clqq {.9}
+    \setcharcode \rpcode\crqq {.9}
+    \setcharcode \rpcode .    {1}
+    \setcharcode \rpcode ,    {1}
+    \setcharcode \lpcode ,    {1}  %doplnené , pre funkciu ,úvodzovky‘
+    \setcharcode \rpcode\elq  {1}  %doplnené ‘ pre funkciu ,úvodzovky‘
+    \setcharcode \lpcode\elqq {.9} %doplnená “americká” ľavá úvodzovka
+    \setcharcode \rpcode\erqq {.9} %doplnená “americká” pravá úvodzovka
+    \setcharcode \lpcode\elq  {1}  %doplnená ‘americká’ ľavá úvodzovka
+    \setcharcode \rpcode\erq  {1}  %doplnená ‘americká’ pravá úvodzovka
+    \setcharcode \rpcode\hyph {.9} %zmenené z pôvodnej hodnoty 0.7 na 0.9 
+    \setcharcode \lpcode\hyph {.9} %doplnené o \lpcode\hyph pre použitie v \=
+    %% pre "veľké" interpunkčné znamienka sa závesná interpunkcia nepoužíva,
+    %% ale po odkomentovaní je možné použiť aj tieto znaky:
+    %\setcharcode \lpcode\flqq {.9} %FR <<úvodzovky, doplnené voči TPP
+    %\setcharcode \rpcode\flqq {.9} %FR >>úvodzovky, doplnené voči TPP
+    %\setcharcode \lpcode\frqq {.9} %FR úvodzovky>>, doplnené voči TPP
+    %\setcharcode \rpcode\frqq {.9} %FR úvodzovky<<, doplnené voči TPP
+    %\setcharcode \rpcode ;    {1}  %doplnené voči TPP
+    %\setcharcode \rpcode :    {1}  %doplnené voči TPP
+    %\setcharcode \rpcode !    {1}  %doplnené voči TPP
+    %\setcharcode \rpcode ?    {.8} %doplnené voči TPP
+    %% koniec "veľkých" interpunkčných znamienok
+    \pdfprotrudechars=2 
+}
+\ifdim\pgwidth=0pt \pgwidth=210mm \fi % \pgwidth sa nastaví na hodnotu pre A4
+\newdimen\OkrajeH \OkrajeH=\pgwidth \advance\OkrajeH by -\hsize 
+\ifdim\OkrajeH > \MinOkraj % pre úzke okraje sa závesná inerpunkcia nepoužije
+    \ZavesnaIterpunkcia
+\fi
+%% Definovanie vypnutia a zapnutia ľavých znakov závesnej interpuncie pre
+%% odstavec s \Capinsert, viď súbor ../Reuss_Gustav/G_EAAAA.tex, kap. Afrika
+\ifdim\OkrajeH > \MinOkraj %vypnutie ľavých znakov (pre odstavec s \Capinsert)
+\def\HPleftOff{\setcharcode \lpcode\clqq {0}
+           \setcharcode \lpcode ,    {0}
+           \setcharcode \lpcode\elqq {0}
+           \setcharcode \lpcode\elq  {0}
+           \setcharcode \lpcode\hyph {0}
+           %\setcharcode \lpcode\flqq {0} %pripravené pre FR ľavú úvodzovku
+           %\setcharcode \lpcode\frqq {0} %pripr. pre FR obrátenú úvodzovku
+           }
+\else \def\HPleftOff{} \fi 
+\ifdim\OkrajeH > \MinOkraj %zapnutie ľavých znakov (po odstavci s \Capinsert)
+\def\HPleftOn{\setcharcode \lpcode\clqq {.9}
+          \setcharcode \lpcode ,    {1}
+          \setcharcode \lpcode\elqq {.9}
+          \setcharcode \lpcode\elq  {1}
+          \setcharcode \lpcode\hyph {.9}
+          %\setcharcode \lpcode\flqq {.9} %pripravené pre FR ľavú úvodzovku 
+          %\setcharcode \lpcode\frqq {.9} %pripr. pre FR obrátenú úvodzovku
+          }
+\else \def\HPleftOn{} \fi
+
+% Rozdelenie inexov do oddielov s nadpisom podľa písmena
+% https://petr.olsak.net/opmac-tricks.html#currchar
+% nevhodné pre RS, pred položku s RS vložiť napr. \null
+% vo vim :%s/{{\\tt/{\\null{\\tt/gc
+\ifnum\IndexChar = 1
+\def\lastchar{\null} % doplnené voči opmac-tricks.html#currchar 
+\def\everyii{\expandafter\makecurrchar\currii\end
+    \ifx\currchar\lastchar \else
+    \if\currchar\lastchar \else % doplnené voči opmac-tricks.html#currchar
+       \bigskip{\typosize[12/16]\bf\currchar}\par\nobreak\medskip\noindent
+       \let\lastchar=\currchar
+    \fi\fi 
+} 
+\def\makecurrchar#1#2\end{\uppercase{\def\currchar{#1}}}
+\fi
+% Klikacie odkazy na čísla strán v indexových položkách
+% https://petr.olsak.net/opmac-tricks.html#klikpgr
+% určené len pre malý počet indexových položiek
+\ifnum\IndexLink = 1
+\def\printiipages#1&{\usepglinks#1\relax\par}
+\def\usepglinks{\afterassignment\usepglinksA \tmpnum=}
+\def\usepglinksA{\pglink{\the\tmpnum}\futurelet\next\usepglinksB}
+\def\usepglinksB{\ifx\next\relax \def\next{}\else
+    \ifx\next,\def\next,{, \afterassignment\usepglinksA \tmpnum=}\else
+    \ifx\next-\def\next--{--\afterassignment\usepglinksA\tmpnum=}%
+    \fi\fi\fi\next}
+\fi
+
+%% https://petr.olsak.net/opmac-tricks.html#capinsert 
+%% nastavenie jednotiek (\ptex a \VshiftFont sa nastaví už pri konfigurácii)
+\newdimen\ptem       \ptem=.1em          % jednotka závislá na em 
+                     \ptex=.1ex          % jednotka závislá na ex 
+%\newdimen\ptex      \ptex=.1ex          % jednotka závislá na ex 
+\newdimen\Capsize    \Capsize=70\ptex    % požadovaná veľkosť (2 riadky) 
+\newdimen\Capabove   % horný presah cez účarie, hodnota je v \declCap
+\ifnum\CapNumLines=3
+\Capsize=116\ptex                        % požadovaná veľkosť (3 riadky)
+\VshiftFont=1.7\VshiftFont               % pomer veľkostí 116/70 v \ptex
+\fi
+\newdimen\Capafter   \Capafter=1\ptem    % medzera za písmenom 
+%\newdimen\VshiftFont \VshiftFont=0\ptex % vertikálny posun pre písmeno
+%% vlastné makrá
+\def\declCap #1#2{\sxdef{cap:=#1}{#2}}
+\def\Capinsert{\def\leftCapmaterial{}\futurelet\next\CapinsertA} 
+\def\CapinsertA{\ifx\next\bgroup \expandafter\CapinsertB \else 
+\expandafter\CapinsertC \fi} 
+\def\CapinsertB #1{\def\leftCapmaterial{#1}\CapinsertC} 
+\def\CapinsertC #1{\par 
+  \isdefined{cap:=#1}\iftrue \edef\tmp{\csname cap:=#1\endcsname}% 
+                     \else   \edef\tmp{\csname cap:=default\endcsname}\fi 
+  \setbox0=\hbox{{\thefontsize[\expandafter\ignorept\the\Capsize]\Capprefix#1}\kern\Capafter}% 
+  \expandafter \CapinsertD \tmp,,% 
+  \noindent\kern-\firstlineindent \rlap{\kern-\protrudeCap\ptem\llap{\leftCapmaterial}% 
+  \advance\Capabove by \VshiftFont      \vbox to0pt{\kern-\Capabove\box0\vss}}% 
+  \kern\firstlineindent 
+} 
+\def\CapinsertD #1:#2;{\tmpnum=1 \let\firstlineindent=\undefined 
+   \Capabove=#2\ptex \def\parshapeparams{}\def\protrudeCap{#1}\CapinsertE} 
+\def\CapinsertE #1,{\ifx,#1,\parshape =\tmpnum \parshapeparams 0pt \hsize 
+  \else 
+     \advance\tmpnum by1 
+     \tmpdim=\wd0 \advance\tmpdim by-#1\ptem \advance\tmpdim by-\protrudeCap\ptem 
+     \edef\parshapeparams{\parshapeparams\the\tmpdim}% 
+     \ifx\firstlineindent\undefined \let\firstlineindent\parshapeparams \fi 
+     \advance\tmpdim by-\hsize \tmpdim=-\tmpdim 
+     \edef\parshapeparams{\parshapeparams\the\tmpdim}% 
+     \expandafter \CapinsertE \fi 
+} 
+\def\hboxshift#1#2{\vbox to0pt{\vss\hbox{#2}\kern-#1}}
+%% Deklarácia k jednotlivým písmenám v tvare: 
+% \declCap písmeno {presah doľava:hore; korekcia prvého riadka, druhého, ...}
+% (potrebné postupne doplniť aj o ďalšie písmená podľa potreby)
+\declCap {default} {0:20;0,0}  % východzia hodnota pre nedeklarované písmená 
+\declCap A {1:20;6,-2} 
+\declCap B {2:20;1,-1}
+\declCap D {1:20;0,0}
+\declCap Ď {1:30;0,0}
+\declCap E {1:20;0,-1}
+\declCap I {1:20;0,-1}
+\declCap J {1:21;2,1}
+\declCap K {1:20;1,-2} 
+\declCap L {0:20;9,0}
+\declCap Ľ {0:20;1,-2}
+\declCap N {2:20;0,-1}
+\declCap P {1:20;0,6} 
+\declCap U {1:21;2,1}
+\declCap V {2:21;0,6}
+\declCap W {3:20;0,6}
+\declCap Z {1:20;1,-1}
+\ifdim\hsize < \MinHsize \declCap Č {-1.2:31;0,-2} \else
+\declCap Č {1:31;0,-2} \fi
+\ifx\FontType\CMCS \declCap Ľ {0:30;2,-2} \else \ifdim\hsize < \MinHsize
+\declCap Č {-1.2:36;0,-2} \else \declCap Č {1:36;0,-2}
+\fi\fi
+\ifnum\CapNumLines=3
+\declCap {default} {0:24;0,0,0}  % východzia hodnota pre nedeklarované písmená 
+\declCap A {1:24;6,2,-2}
+\declCap B {2:24;2,-1,-1}
+\declCap Č {1:42;0,-2,-2}
+\declCap D {1:24;2,-1,3} 
+\declCap Ď {1:40;2,-1,3}
+\declCap E {1:24;0,-1,-1}
+\declCap I {1:24;0,-1,-1}
+\declCap J {1:25;2,0,0}
+\declCap K {1:24;1,3,-3}
+\declCap L {0:24;9,0,0}
+\declCap Ľ {0:24;2,-2,-2}
+\declCap N {1:24;2,0,0}
+\declCap P {1:24;0,0,6}
+\declCap U {1:25;2,1,1}
+\declCap V {2:24;0,3,6}
+\declCap W {3:24;0,4,6} 
+\declCap Z {1:24;1,-1,-1}
+\ifx\FontType\CMCS 
+\declCap Ľ {0:41;2,-2,-2}
+\else
+\declCap Ď {1:46;2,-1,3}
+\fi\fi
+%% V prípade ak je 1. odstavec krátky a ďaľšie odstavce môžu zasiahnuť do 
+%% zväčšeného písmena, je potrebné ich potrebné zrušiť, ale v prípade ak sa
+%% zväčšené písmeno nepoužije, vykonať odriadkovanie a odsadenie.
+\def\CapIskip{} \def\CapIIskip{} 
+\def\HIleftOff{} \def\HIIleftOff{} \def\HIleftOn{} \def\HIIleftOn{}
+\ifnum\IfCapInsert>0 \let\nli\nl \let\CapIskip=\SmallSkip 
+\let\HIleftOff=\HPleftOff \let\HIleftOn=\HPleftOn \else 
+\def\nli{\nl\indent}\fi
+\ifnum\IfCapInsert>1 \let\nlii\nl \let\CapIIskip=\SmallSkip 
+\let\HIIleftOff=\HPleftOff \let\HIIleftOn=\HPleftOn \else 
+\def\nlii{\nl\indent}\fi
+%% Zapnutie funkcie \Capinsert na základe hodnoty \IfCapInsert
+\ifnum\IfCapInsert<1 \def\CapInsert{\noindent} \def\CapIInsert{\noindent} \else 
+\ifnum\IfCapInsert>1 \let\CapInsert=\Capinsert \let\CapIInsert=\Capinsert  
+\else                \let\CapInsert=\Capinsert \def\CapIInsert{\noindent}\fi\fi
+%% Ak je potrebné umiestniť úvodzovku pred zväčšené písmeno vľavo dole 
+%% pozn. \kern0pt bolo pôvodne \kern-2pt, ktoré sa presunulo do parametra
+%% \CapIInsert pre súbor ../Reuss_Gustav/E_Hviezdy.tex
+\def\LeftCapIMaterial#1{{\ifnum\IfCapInsert<1 {#1}\else
+\thefontscale[\magstep2]\localcolor\Grey\hboxshift{34\ptex}{#1}\kern0pt\fi}}
+\def\LeftCapIIMaterial#1{{\ifnum\IfCapInsert<2 {#1}\else
+\thefontscale[\magstep2]\localcolor\Grey\hboxshift{34\ptex}{#1}\kern0pt\fi}}
+\ifnum\CapNumLines=3
+\def\LeftCapIMaterial#1{{\ifnum\IfCapInsert<1 {#1}\else
+\thefontscale[\magstep3]\localcolor\Grey\hboxshift{62\ptex}{#1}\kern0pt\fi}}
+\def\LeftCapIIMaterial#1{{\ifnum\IfCapInsert<2 {#1}\else
+\thefontscale[\magstep3]\localcolor\Grey\hboxshift{62\ptex}{#1}\kern0pt\fi}}
+\fi
+
+
+\endinput
+

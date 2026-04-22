@@ -1,0 +1,134 @@
+%%%                     Súbor ZfSMEscenar.tex                             %%%
+
+% Obsahuje vlastné makrá pre texty divadelných scenárov v knihách zo stránok
+% http://zlatyfond.sme.sk, ktoré boli  odladené  pre  hru Chudobná rodina od
+% Boženy Slančíkovej-Timravy.  Pre spracovanie iných hier bude asi  potrebné
+% doplniť niektoré makrá. Pre vlastné makrá je okrem samotného systému plain
+% pdfTeX potrebný aj CSTeX a súbor makier OPmac a makrá ZfSME.tex.
+
+
+
+%%% Vlastné makrá (začínajú sa obyčajne veľkým písmenom) %%%
+
+% V prípade že sa nepoužíva TeXonWeb -- https://tex.mendelu.cz pomocou
+%\input TeXonWeb.tex % je potrebné definovať makro \ToWp :
+\ifx\ToWp\undefined \def\ToWp{} \fi
+
+% Pre staršie verzie CSTeX nemusí byť \elq definované
+\ifx\elq\undefined \chardef \elq 96 \fi
+
+% Prednastavené hodnoty, pokiaľ neboli definované v konfigurácii:
+\ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
+\ifx\Vers\undefined \input \ZFroot ZfSME \fi % ak nie je načítaný ZfSME.tex
+
+% Predefinovaie makra \TypoInfo pre použitie v českej aj slovenskej verzii
+% textu (pomocou makier \sdef a \mtext z balíka OPmac):
+\sdef{mt:typoinfo:sk}%
+{Sadzba programom \ulink[https://ctan.org]{\TeX} písmom \FontType.}
+\sdef{mt:typoinfo:cs}%
+{Sazba programem \ulink[https://ctan.org]{\TeX} písmem \FontType.}
+\def\TypoInfo{% Vytlačí info o TeX a použitom fonte
+\ifdim\vsize > 110mm \vskip 48pt\noindent \else \medskip\noindent \fi
+\mtext{typoinfo}}
+
+
+% Použitie kapitálok (s tvarom veľkých písmen pre základný rez Roman)
+\def\CR{\caps\rm}
+\def\CB{\caps\bf}
+% Kapitálky nefungujú v písme CM/CS, preto:
+\ifx\FontType\CMCS 
+\let\CR=\empty 
+\let\CB=\bf 
+% Nefungujú tu ani ,jednoduché` úvodzovky (viď TPP s. 16 a s. 134):
+\def\clq{,}
+\def\crq{`}
+\fi
+% Kapitálky nefungujú ani v písme Charter, preto:
+\def\tmp{Charter}
+\ifx\FontType\tmp
+\let\CR=\empty 
+\let\CB=\bf 
+\fi
+
+\def\ScenaPopis#1\par{% Popis scény na začiaku dejstva (1 odstavec)
+\noindent{\it #1\par}\medskip\noindent}
+
+\def\SP#1){% popis scény v rámci repliky - medzi "(" a ")"
+{\it #1)\/}}
+
+\def\SPP#1){\noindent % popis scény medzi replikami - medzi "(" a ")"
+{\it #1)\/}\smallskip}
+
+
+\def\Obsadenie#1\par{% Zoznam účinkujúcich vo výstupe (1 odstavec)
+\nobreak\noindent{\it #1}\medskip
+}
+
+\def\Rep#1:#2\par{\def\tmp{#1} % Replika v tvare osoba:text repliky
+\ifx\tmp\Osoba 
+\noindent {\CB #1}{\hangindent=.5\parindent #2\smallskip}%
+\else\ifx\tmp\OsobaB
+\noindent {\CB #1}{\hangindent=.5\parindent #2\smallskip}%
+\else\ifx\tmp\OsobaC
+\noindent {\CB #1}{\hangindent=.5\parindent #2\smallskip}%
+\else
+\noindent {\CR #1}{\hangindent=.5\parindent #2\smallskip}%
+\fi\fi\fi}
+
+\def\RepC#1\par{% pokračovanie repliky (napríklad prerušenej veršom)
+{\hangindent=.5\parindent \parindent=\hangindent #1\smallskip}
+}
+
+\def\Opona#1\par{%
+    \removelastskip\nobreak\MedSkip\centerline{\it(Opona #1\kern-.25em.)}
+}
+
+% Slovo Konec a jeho formát pre celý riadok na konci dejstva (CZ)
+\def\Konec#1\par{\nobreak\MedSkip\noindent{\fC\it Konec\ #1\par}}
+
+
+%% https://groups.google.com/g/comp.text.tex/c/SbzyM6ZdVwo/m/HuDeL4vKPgsJ
+%% (viď Anil Trivedi, 5. 10. 1993, 13:20:49)
+\long\def\Ignore#1\endIgnore{\relax}
+\def\endIgnore{\relax} % možné použiť priamo \Ignore ... \endIgnore
+%% \Ignore je možné použiť aj vo vnútri ďaľšieho makra,  takže funguje aj
+\def\ifIgnoreVystup#1{% \ifIgnoreVystup{osoba1,osoba2,...} ... \endIgnore
+\ifx\OsobyFilter\undefined \def\OsobyFilter{0}\fi
+\ifx\Osoba\undefined \def\Osoba{0}\fi
+\ifx\OsobaB\undefined \def\OsobaB{0}\fi
+\ifx\OsobaC\undefined \def\OsobaC{0}\fi
+\if\Osoba0 \else \ifx^#1^ \else % Ak Osoba=0, alebo je zoznam osôb prázdny
+   \ifnum\OsobyFilter=1         % táto vetva sa nevykonáva
+          \expandafter\jevzozname \Osoba\in{#1}\ifincluded \else 
+          \expandafter\jevzozname \OsobaB\in{#1}\ifincluded \else 
+          \expandafter\jevzozname \OsobaC\in{#1}\ifincluded \else 
+          \Ignore    % výstup sa netlačí len pri kombinácii ak je nastavený
+          \fi\fi\fi  % filter a osoba nie je v zozname pre výstup
+   \fi\fi\fi
+}
+%% TPP, str. 71--72
+\newif\ifincluded
+\def\jevzozname#1\in#2{% #1 = slovo, #2 = zoznam
+\def\tmp##1,#1,##2\end{\ifx^##2^\includedfalse\else\includedtrue\fi}%
+\tmp,#2,#1,\end
+}
+
+\endinput
+
+%%% Náhrady vo vim (aplikovať až po logickom vyznačení ostatných častí hry
+%   (makrá \sec, \secc, seccc, \Perex, \ScenaPopis, \Obsadenie, \Opona, ...
+%   okrem makra pre vyznačenie repliky \Rep)):
+
+- pred doplnením vyznačenia replík je teraz vhodné aplikovať makro vim
+  pre preformátovanie "rozbitých" odstavcov:
+:'<,'>call Justify("tw",3)
+
+- odstavec sa začína dvomi veľkými písmenami, preto by to mala byť replika
+(makro \Rep):
+:%s/\n\(\n^[A-Z][A-Z]\)/\r\r\\Rep \1/gc
+
+- pre hru Páva obsahovali prvé dva znaky diakritiku (ĎURKO, IĽKA, ŠTEFAN),
+  preto aj:
+:%s/\n\(\n^[Ď][U]\)/\r\r\\Rep \1/gc
+:%s/\n\(\n^[I][Ľ]\)/\r\r\\Rep \1/gc
+:%s/\n\(\n^[Š][T]\)/\r\r\\Rep \1/gc

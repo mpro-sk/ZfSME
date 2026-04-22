@@ -1,0 +1,111 @@
+%%% Pre aktiváciu nastavení odkomentovať riadok  (nie v tomto súbore,  ale
+%%% v prekladanom zdrojovom súbore, umiestnenom tesne pred načítaním makra
+%%% ZfSME):
+%\input \ZFroot AKindle % nastavenia pre Amazon Kindle (č/b e-book A6)
+
+%% https://groups.google.com/g/comp.text.tex/c/SbzyM6ZdVwo/m/HuDeL4vKPgsJ
+%% (viď Anil Trivedi, 5. 10. 1993, 13:20:49)
+\long\def\Ignore#1\endIgnore{\relax}
+\def\endIgnore{\relax} % možné použiť priamo \Ignore ... \endIgnore
+\def\IfIgnore{0}
+\ifx\sdef\undeffined \input opmac \def\IfIgnore{1} \fi
+\ifx\ZFroot\undeffined \def\ZFroot{} \fi
+
+%% Platí posledný odkomentovaný riadok z tejto dvojice:
+\sdef{pgs:a6k}{(90,120)mm} % skutočná veľkosť plochy e-ink (je menšia ako A6) 
+\sdef{pgs:a6k}{(96,128)mm} % veľkosť plochy e-ink (o niečo väčšia ako skutočná)
+
+\hyperlinks{\Grey}{\Grey}         % nastavenie šedých klikacích odkazov
+\def\Capprefix{\localcolor\Grey}  % prvé veľké písmeno bude šedé 
+\def\ObrPdf{1}              % č/b verzia vkladaných {obrázkov
+\def\LogoZF{-1}             % čísla strán v strede päty (pre e-book)
+\def\ZahlavieTlac{0}        % bez tlače záhlavia
+\def\obrys#1{\vbox{\hrule\hbox{\vrule#1\vrule}\hrule}}
+\def\TitSkip{-0} 
+%\def\TitSkip{-.04} % odkomentovať len pre viac mien, alebo dlhý názov
+%% PDF prehliadač v Kindle zobrazuje len jej viditeľnú časť, bez ohľadu na
+%% Bouding Box, preto sa číslo strany síce vytlačí, ale bude biele
+%% (neviditeľné len pre oko čiateľa); tak isto ako tenká vodorovná biela
+%% čiara na začiatku strany:
+\def\nopagenumbers{\footline={\localcolor\White\hss\tenrm\folio\hss}}
+\def\KindleHR{{\localcolor\White\hrule}}
+%% Platí posledný odkomentovaný riadok z tejto dvojice:
+%\margins/1 a6  (3,3,3,11)mm % nastavenie formátu A6, okraje na 3mm,
+\margins/1 a6k (3,3,3,11)mm % nastavenie formátu pre AKindle, okraje na 3mm,
+                            % spodný 11mm (číslo strany v strede päty)
+
+\ifnum\IfIgnore = 1 \Ignore \fi
+\endinput \endIgnore
+
+%%% Kalibrácia obrazovky Amazon Kindle A6 %%%
+
+\shyph % zapína slovenské delenie slov vo formáte csplain/pdfcsplain
+\sdef{pgs:a6k}{(90,120)mm} % skutočná veľkosť plochy e-ink (je menšia ako A6) 
+\margins/1 a6k (3,3,3,11)mm % nastavenie formátu pre AKindle
+\def\Titul{Kalibrácia obrazovky Amazon Kindle~A6}
+\def\Autor{Marián Prochocký}
+\input pdfuni % umožní vkladať PDF informácie v kódovaní UTF-16BE Unicode
+\pdfunidef\tmp{\Autor}    \pdfinfo{/Author (\tmp)}
+\pdfunidef\tmp{\Titul}    \pdfinfo{/Title (\tmp)}
+\activettchar"
+\input \ZFroot ZfSME2
+
+\def\nopagenumbers{\footline={\localcolor\Grey\hss\tenrm\folio\hss}}
+\def\KindleHR{{\localcolor\LightGrey\hrule}}
+
+
+\TitulStrana
+
+%% Nastavenie číslovania strán
+\pageno=1 \PageNumbers %obnovenie číslovania strán od strany 1
+
+\seccc \Titul
+
+Nasledujúca strana slúži na kontrolu správneho nastavenia hodnôt pre rozmery
+plochy s~e\=ink v~súbore "AKindle.tex". Pokiaľ sú hodnoty rozmerov nastavené
+správne,  mali by byť  rozmery obdĺžnika nasledovné  (pričom  1\,pt $\doteq$
+0.35146\,mm):
+
+"\hsize" = \the\hsize\par
+"\vsize" = \the\vsize\par
+
+\noindent
+čo by  mala byť  cca 84\,mm  šírka  obdĺžnika  (tomu  zodpovedá  "\hsize") a
+106\,mm jeho výška (tomu zodpovedá "\vsize").
+
+Pri tomto je  však  potrebné  zabezpečiť  zobrazovanie  správnych  proporcií
+strán, ktorých vyplnenie sa začína medzerou (patitul a titul knihy)~-- tu sa
+doplní neviditeľná (biela) vodorovná  čiara  na  začiatok  strany;  prípadne
+chýba číslo strany~-- tu sa doplní jeho číslo neviditeľným (bielym)  písmom.
+V~tomto dokumente je pre tieto prvky na titulnej  strane  zmenená  farba  na
+šedú, takže sú viditeľné.
+\NewPage
+
+\obrys{\hskip\hsize \vbox to\vsize{}}
+\NewPage
+
+%% veľkosť plochy e-ink (o niečo väčšia ako skutočná)
+\sdef{pgs:a6k}{(96,128)mm} 
+\margins/1 a6k (3,3,3,11)mm % nastavenie formátu pre AKindle
+
+V~súbore "AKindle.tex" je alternatívne aj  možnosť  nastaviť  o~niečo  väšie
+rozmery strany, ako je fyzická veľkosť plochy  e\=ink.  Jedná  sa  o  rozmer
+strany s~rovnakou šírkou strany, ako je použitá pre  formát  "eb"  a  "ebr",
+t.~j. 96\,mm, čo zabezpečí aj vhodné nastavenie ostatných parametrov, ako aj
+zlom odstavcov do riadkov s~rovnakou šírkou. Toto sa  používa  obyčajne  pri
+zložitejšie formátovaných knihách. Pri tomto dôjde  automaticky  k~zmenšeniu
+strany. Keďže rozmery sú len o~niečo väčšie,  aj  písmo  sa  zmenší  v~tomto
+pomere ($90:96$, t.~j. \FR 15/16 , tak ako na tejto strane):
+
+"\hsize" = \the\hsize\par
+"\vsize" = \the\vsize\par
+
+\noindent
+Výsledok je na nasledujúcej strane,  kde má výsledný obdĺžnik  (zobrazený na
+zariadení Amazon Kindle) rovnaké rozmey, ako obdĺžnik na strane 2.
+\NewPage
+
+\obrys{\hskip\hsize \vbox to\vsize{}}
+
+\bye
+
