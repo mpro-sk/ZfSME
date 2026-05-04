@@ -551,13 +551,14 @@ $\,{#1\over#2}\,$\fi}}
 \def\NumOff{\nonum \def\nonumfalse{\pagedepth=\pagedepth}}
 \ifnum\NoNum = 1
 \NumOff
+% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
+%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
+
 % Namiesto názvu Kapitola štvotrec na pravej strane (pre nečíslované kapitoly)
 \sdef{mt:chap:sk}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:cs}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:en}{\hfill\vrule height12pt depth2pt width14pt}
 \fi
-% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
-%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
 
 % Predefinovanie RS \chap \sec a \secc z OPmac pre písmenné označenie kapitol, 
 % sekcí a podsekcí (napríklad A, B, C. ...) pomocou nových RS \chapnumf,
