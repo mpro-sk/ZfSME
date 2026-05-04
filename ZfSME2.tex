@@ -414,9 +414,15 @@
 \noindent{\fC
 \url{http://zlatyfond.sme.sk/dokument/autorske-prava/}\par}}
 
+% Definovaie makra \TypoInfo pre použitie v českej aj slovenskej verzii
+% textu (pomocou makier \sdef a \mtext z balíka OPmac):
+\sdef{mt:typoinfo:sk}%
+{Sadzba programom \ulink[https://ctan.org]{\TeX} písmom \FontType.}
+\sdef{mt:typoinfo:cs}%
+{Sazba programem \ulink[https://ctan.org]{\TeX} písmem \FontType.}
 \def\TypoInfo{% Vytlačí info o TeX a použitom fonte
 \ifdim\vsize > 110mm \vskip 48pt\noindent \else \medskip\noindent \fi
-Sadzba programom \ulink[https://ctan.org]{\TeX} písmom \FontType .}
+\mtext{typoinfo}}
 
 % Vytvorenie formátu pre jazykovú úpravu, text zarovnaný vľavo
 \def\JazykUprava#1\par{\norempenalty-100 \bigskip \noindent
