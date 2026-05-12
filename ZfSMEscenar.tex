@@ -79,6 +79,9 @@
 {\hangindent=.5\parindent \parindent=\hangindent #1\smallskip}
 }
 
+\def\iCB#1:{% označenie ďalšej osoby v texte repliky (formát osoba:)
+{\def\tmp{#1}\ifx\Osoba\tmp\CB\else\CR\fi #1}}
+
 \def\Opona#1\par{%
     \removelastskip\nobreak\MedSkip\centerline{\it(Opona #1\kern-.25em.)}
 }

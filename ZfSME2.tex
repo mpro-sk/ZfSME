@@ -5,9 +5,9 @@
 % doplniť niektoré makrá. Pre vlastné makrá je okrem samotného systému plain
 % pdfTeX potrebný aj CSTeX a súbor makier OPmac.
 %
-% Upravené makrá ZFSME.tex vedia dodržať riadkový register v prípade formátov
+% Upravené makrá ZfSME.tex vedia dodržať riadkový register v prípade formátov
 % určenými pre tlač, ale pokiaľ nie je nastavený parameter \RiadkovyRegister
-% na hodnotu 1, výstup bude zhodný, ako pri použití makier ZFSme.tex.
+% na hodnotu 1, výstup bude zhodný, ako pri použití makier ZfSME.tex.
 % Zároveň boli doplnené aj makrá zo súboru ZfSMEscenar.tex.
 %%% Len testovacia verzia vo vývoji, ešte nie je upravené všetko potrebné !!!
 
@@ -1103,6 +1103,9 @@ $\,{#1\over#2}\,$\fi}}
 \def\RepC#1\par{% pokračovanie repliky (napríklad prerušenej veršom)
 {\hangindent=.5\parindent \parindent=\hangindent #1\smallskip}
 }
+
+\def\iCB#1:{% označenie ďalšej osoby v texte repliky (formát osoba:)
+{\def\tmp{#1}\ifx\Osoba\tmp\CB\else\CR\fi #1}}
 
 \def\Opona#1\par{%
     \removelastskip\nobreak\MedSkip\centerline{\it(Opona #1\kern-.25em.)}
