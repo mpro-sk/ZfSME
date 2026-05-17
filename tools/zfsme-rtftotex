@@ -1,16 +1,18 @@
 #!/bin/bash
-### bash skript slúži na prevod *.rtf súborov zo Zlatý fond Sme do *.tex ###
+###    BASH skript slúži na prevod *.rtf (alebo aj *.html) súborov zo    ###
+###                           Zlatý fond SME do *.tex                    ###
 #  Tento skript používa programy LibreOffice Writer, antiword, sed, echo   #
 #  vlna a less. Určené pre Mac OS X, testované na 10.4 (pre PPC).          #
 #  Pre spracovanie *.tex súboru je potrebný  CSTeX (pdfcsplain) a OPmac,   #
 #  ako aj súbor makier pre plain/OPmac s názvom ZfSME.tex.                 #
 MAINFILEBASE=$(echo "$1" | sed 's/\.[^.]*$//')
+FILEXT=$(echo "$1" | sed 's/^.*\.//')
 HEADER=$2
 ### echo generuje hlavičku tex súboru (nastavenia a makrá):
 if [ "$HEADER" = "0" ] ; then echo %%% "$MAINFILEBASE".tex > $MAINFILEBASE.tex
 else
 echo %%% "$MAINFILEBASE".tex '
-% Súbor generovaný skriptom zfsme-rtf2tex %
+% Súbor generovaný skriptom zfsme-rtftotex %
 
 %%% Postup pri spracovaní dokumentu -- urobí tento skript %%%
 
@@ -166,7 +168,16 @@ echo %%% "$MAINFILEBASE".tex '
 
 %% Načítanie vlastných makier pre Zlatý fond Sme:
 \ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
-\input \ZFroot ZfSME
+%\input \ZFroot AKindle   % nastavenia pre Amazon Kindle (č/b e-book A6)
+%\input \ZFroot BBQ10     % nastavenia pre Black Berry Q10
+\let\SmallSkip=\smallskip % pre kompatibilutu s pôvodným ZfSME
+\let\MedSkip=\medskip     % pre kompatibilutu s pôvodným ZfSME
+\def\vycentruj{}          % pre kompatibilutu s pôvodným ZfSME
+%\def\RiadkovyRegister{1}  % po odkomentovaní funguje RR s ZfSME2
+%% odkomentovať len jeden z nasledujúcich 2 riadkov:
+%\input \ZFroot ZfSME2 % upravené makrá reagujú na parameter pre RR
+\input \ZFroot ZfSME % pôvodné makrá nevedia dodržať riadkový register
+\ifx\RiadkovyRegister\undefined \def\RiadkovyRegister{0} \fi % pre k. s ZfSME
 %% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
 %\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
 %\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
@@ -253,12 +264,29 @@ fi
 ### skonvertuje rtf (alebo iný súbor čitateľný LO Writer) do dočasného doc 
 ### súboru, s ktorým bude pracovať program antiword:
 #libreoffice --headless --infilter=“writer_rtf_import” --convert-to doc $1;
-/Applications/LibreOffice.app/Contents/MacOS/soffice.bin --headless --infilter=“writer_rtf_import” --convert-to doc $1;
+if [ "$FILEXT" = "htm" ] || [ "$FILEXT" = "HTM" ] || [ "$FILEXT" = "html" ] || [ "$FILEXT" = "HTML" ] ; then
+/Applications/LibreOffice.app/Contents/MacOS/soffice.bin --headless \
+--infilter=“HTML Document” \
+--convert-to doc:"MS Word 97" $1;
+else
+/Applications/LibreOffice.app/Contents/MacOS/soffice.bin --headless \
+--infilter=“writer_rtf_import” \
+--convert-to doc:"MS Word 97" $1;
+fi
 ### vygeneruje obsah tex súboru z dočasného doc:
+## pre html súbory je rozsah zmien ako v skripte zfsme-html2tex, preto:
+if [ "$FILEXT" = "htm" ] || [ "$FILEXT" = "HTM" ] || [ "$FILEXT" = "html" ] || [ "$FILEXT" = "HTML" ] ; then
+antiword -f -m UTF-8 $MAINFILEBASE.doc | sed 's/\\/|||/g;s/\$/\$|||/g; s/{/\$\\{$/g;s/}/\$\\}$/g ; s/%/\\%/g;s/~/\\~{}/g ; s/&/\\&/g ; s/\^/{\\tt\\char94}/g ; s/_/{\\tt\\char95}/g ; s/#/\\#/g;s/\$|||/\\\$/g ; s/|||/$\\backslash$/g ; s/—/--/g ; s/–/--/g ; s/°/\\Deg{}/g ; s/×/\$\\times$/g ; s/‘/{}\\elq{}/g ; s/’/\\char39{}/g ; s/ę/\\ogonek{e}/g; s/a̋/\\H{a}/g ; s/ő/\\H{o}/g ; s/ /~/g ; s/ "\([ŽžA-Za-z0-9‚.{(]\)/ „\1/g ; s/^"\([ŽžA-Za-z0-9‚.{(]\)/„\1/g ; s/\([A-Za-z!?;,.-})]\)"/\1“/g ; s/\([0-9]\) \{1,\}\([0-9]\)/\1\\,\2/g ; s/\([0-9a-z]\)-\{1,\}\([A-Za-z]\)/\1\\=\2/g ; s/\([0-9]\{1,\}\)\/\([0-9]\{1,\}\)/\\FR \1\/\2 /g ; s/^[ ]*[*][ ]*$/\\Hviezdicka/g ; s/ \{1,5\}--/~--/g ; s/ \{1,5\}-/~--/g ; s/^[ ]*[*]\(.\{1,\}\)[*][ ]*$/\
+\\seccc %\
+\1\
+/g ; s/^\([ ]*[/].\{1,\}\)[/][ ]*$/\1\\nl/g ' | vlna -f >>  $MAINFILEBASE.tex;
+else
+## pre ostatné typy súborov to zostalo bez zmien voči pôvodnému zfsme-rtf2tex
 antiword -f -m UTF-8 $MAINFILEBASE.doc | sed 's/\\/|||/g;s/\$/\$|||/g; s/{/\$\\{$/g;s/}/\$\\}$/g ; s/%/\\%/g;s/~/\\~{}/g ; s/&/\\&/g ; s/\^/{\\tt\\char94}/g ; s/_/{\\tt\\char95}/g ; s/#/\\#/g;s/\$|||/\\\$/g ; s/|||/$\\backslash$/g ; s/—/--/g ; s/–/--/g ; s/°/\\Deg{}/g ; s/×/\$\\times$/g ; s/‘/{}\\elq{}/g ; s/’/\\char39{}/g ; s/ę/\\ogonek{e}/g; s/a̋/\\H{a}/g ; s/ő/\\H{o}/g ; s/ /~/g ; s/\([0-9]\) \{1,\}\([0-9]\)/\1\\,\2/g ; s/\([0-9a-z]\)-\{1,\}\([A-Za-z]\)/\1\\=\2/g ; s/\([0-9]\{1,\}\)\/\([0-9]\{1,\}\)/\\FR \1\/\2 /g ; s/^[ ]*[*][ ]*$/\\Hviezdicka/g ; s/ \{1,5\}--/~--/g ; s/^[ ]*[*]\(.\{1,\}\)[*][ ]*$/\
 \\seccc %\
 \1\
 /g ; s/^\([ ]*[/].\{1,\}\)[/][ ]*$/\1\\nl/g ' | vlna -f >>  $MAINFILEBASE.tex;
+fi
 ### vygeneruje koniec tex súboru:
 echo '\bye
 %%% ' >>  $MAINFILEBASE.tex;
