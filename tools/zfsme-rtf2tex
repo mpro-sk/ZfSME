@@ -1,10 +1,12 @@
 #!/bin/bash
-### bash skript slúži na prevod *.rtf súborov zo Zlatý fond Sme do *.tex ###
+###    BASH skript slúži na prevod *.rtf (alebo aj *.html) súborov zo    ###
+###                           Zlatý fond SME do *.tex                    ###
 #  Tento skript používa programy OpenOffice Writer, antiword, iconv, sed   #
-#  echo, less a vlna.                                                      #
+#  echo, less a vlna. Táto verzia sa zjednotila so skriptom zfsme-html2tex #
 #  Pre spracovanie *.tex súboru je potrebný  CSTeX (pdfcsplain) a OPmac,   #
 #  ako aj súbor makier pre plain/OPmac s názvom ZfSME.tex.                 #
 MAINFILEBASE=$(echo "$1" | sed 's/\.[^.]*$//')
+FILEXT=$(echo "$1" | sed 's/^.*\.//')
 HEADER=$2
 ### echo generuje hlavičku tex súboru (nastavenia a makrá):
 if [ "$HEADER" = "0" ] ; then echo %%% "$MAINFILEBASE".tex > $MAINFILEBASE.tex
@@ -253,12 +255,71 @@ fi
 
 ### skonvertuje rtf (alebo iný súbor čitateľný LO Writer) do dočasného doc 
 ### súboru, s ktorým bude pracovať program antiword:
-libreoffice --headless --infilter=“writer_rtf_import” --convert-to doc $1;
+if [ "$FILEXT" = "htm" ] || [ "$FILEXT" = "HTM" ] || [ "$FILEXT" = "html" ] || [ "$FILEXT" = "HTML" ] ; then
+libreoffice --headless \
+--infilter="HTML Document" \
+--convert-to doc:"MS Word 97" $1;
+else
+libreoffice --headless \
+--infilter=“writer_rtf_import” \
+--convert-to doc:"MS Word 97" $1;
+fi
 ### vygeneruje obsah tex súboru z dočasného doc:
 ## s UTF-8 nefunguje doplnenie formátovania -f, preto sa používa upravená verzia
 ## antiwordu: https://forum.root.cz/index.php?topic=28486.msg398899;topicseen
 ## pre pôvodnú verziu sa používa prekódovanie pmocou uconv: 
 #antiword -f -m cp1250 $MAINFILEBASE.doc | uconv -f cp1250 -t UTF-8 | sed '
+## pre html súbory je rozsah zmien ako v skripte zfsme-html2tex, preto:
+if [ "$FILEXT" = "htm" ] || [ "$FILEXT" = "HTM" ] || [ "$FILEXT" = "html" ] || [ "$FILEXT" = "HTML" ] ; then
+antiword -f -m UTF-8 $MAINFILEBASE.doc | sed '
+### Špeciálny význam týchto znakov v TeX musí byť potlačený 
+### (na poradí vykonávaných zmien záleží):
+s/\\/|||/g		# zmena \ na |||
+s/\$/\$|||/g		# zmena $ na $|||
+s/{/\$\\{$/g		# zmena { na $\{$
+s/}/\$\\}$/g		# zmena } na $\}$
+s/%/\\%/g		# zmena % na \%
+s/~/\\~{}/g		# zmena ~ na \~{}
+s/&/\\&/g		# zmena & na \&
+s/\^/{\\tt\\char94}/g	# zmena ^ na {\tt\char94}
+s/_/{\\tt\\char95}/g	# zmena _ na {\tt\char95}
+s/#/\\#/g		# zmena # na \#	
+s/\$|||/\\\$/g		# zmena $||| na \$ 
+s/|||/$\\backslash$/g	# zmena ||| na $\backslash$
+### Niektoré unicode znaky nemusia byť v použitom fonte definované:
+## EM DASH a EN DASH nie sú v rtf texte jednoznačne definované:
+#s/—/---/g		# zmena unicode pomlčky EM DASH za ---
+s/—/--/g		# zmena unicode pomlčky EM DASH za --
+s/–/--/g		# zmena unicode pomlčky EN DASH za --
+s/°/\\Deg{}/g		# zmena unicode krúžku za RS \Deg 
+s/×/\$\\times$/g	# zmena unicode znaku násobenia za RS $\times$ 
+s/‘/{}\\elq{}/g		# zmena unicode apostrofu ‘ za RS {}\elq{} 
+s/’/\\char39{}/g	# zmena unicode apostrofu ’ za RS \char39
+s/ę/\\ogonek{e}/g 	# zmena unicode ę za RS \ogonek{e}
+s/a̋/\\H{a}/g            # zmena unicode a̋ za \H{a}
+s/ő/\\H{o}/g            # zmena unicode ő za \H{o}
+s/ /~/g                 # zmena unicode nbsp za ~
+### zmena cp1250 znakov nie je veľmi spoľahlivá, potrebná kontrola:
+##  (ak sa nepoužíva prekódovanie, možné zakomentovať)  
+#s/\(a?\)\( \{0,5\}[,;.?a-z]\)/\\H{a}\2/g     #zmena cp1250 a̋ za \H{a}
+###  Pre beh TeX-u nie sú nevyhnutné, upravujú len formátovanie:
+s/ "\([ŽžA-Za-z0-9‚.{(]\)/ „\1/g              #zmena " na začiatku textu za „
+s/^"\([ŽžA-Za-z0-9‚.{(]\)/„\1/g               #zmena " na začiatku riadku za „
+s/\([A-Za-z!?;,.-})]\)"/\1“/g                 #zmena " na konci textu za “
+s/\([0-9]\) \+\([0-9]\)/\1\\,\2/g	      #zmena medzier medzi číslami za \,
+s/\([0-9a-z]\)-\+\([A-Za-z]\)/\1\\=\2/g       #zmena - vo vnútri slova za \=
+s/\([0-9]\+\)\/\([0-9]\+\)/\\FR \1\/\2 /g     #zmena čísel pri / na RS \FR
+s/^[ ]*[*][ ]*$/\\Hviezdicka/g                #zmena * na RS \Hviezdicka
+s/ \{1,5\}--/~--/g	#zmena medzery s pomlčkou za nezlomiteľnú m. s pomlčkou
+s/ \{1,5\}-/~--/g	#zmena medzery s rozdeľovníkom za nezlom. m. s pomlčkou
+s/^\([ ]*[/].\+\)[/][ ]*$/\1\\nl/g            #zmena ^/verš/$ na ^/verš \nl$
+# Nasledujúci filter automaticky pridá členenie na podpodsekcie, nie je 100%
+# spoľahlivý, potrebná ešte ručná kontrola:
+s/^[ ]*[*]\(.\+\)[*][ ]*$/\n\\seccc %\n\1\n/g #zmena ^*Text*% na \seccc 
+
+' | vlna -f >>  $MAINFILEBASE.tex;
+else
+## pre ostatné typy súborov to zostalo bez zmien voči pôvodnému zfsme-rtf2tex
 antiword -f -m UTF-8 $MAINFILEBASE.doc | sed '
 ### Špeciálny význam týchto znakov v TeX musí byť potlačený 
 ### (na poradí vykonávaných zmien záleží):
@@ -295,13 +356,14 @@ s/\([0-9]\) \+\([0-9]\)/\1\\,\2/g	      #zmena medzier medzi číslami za \,
 s/\([0-9a-z]\)-\+\([A-Za-z]\)/\1\\=\2/g       #zmena - vo vnútri slova za \=
 s/\([0-9]\+\)\/\([0-9]\+\)/\\FR \1\/\2 /g     #zmena čísel pri / na RS \FR
 s/^[ ]*[*][ ]*$/\\Hviezdicka/g                #zmena * na RS \Hviezdicka
-s/ \{1,5\}--/~--/g	#zmena medzery s pomlčkou za nezlomiteľnú s pomlčkou
+s/ \{1,5\}--/~--/g	#zmena medzery s pomlčkou za nezlomiteľnú m. s pomlčkou
 s/^\([ ]*[/].\+\)[/][ ]*$/\1\\nl/g            #zmena ^/verš/$ na ^/verš \nl$
 # Nasledujúci filter automaticky pridá členenie na podpodsekcie, nie je 100%
 # spoľahlivý, potrebná ešte ručná kontrola:
 s/^[ ]*[*]\(.\+\)[*][ ]*$/\n\\seccc %\n\1\n/g #zmena ^*Text*% na \seccc 
 
 ' | vlna -f >>  $MAINFILEBASE.tex;
+fi
 ### vygeneruje koniec tex súboru:
 echo '\bye
 %%% ' >>  $MAINFILEBASE.tex;
