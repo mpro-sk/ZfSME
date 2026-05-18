@@ -153,9 +153,20 @@
 %% Načítanie vlastných makier pre Zlatý fond Sme:
 %\ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
 %\input \ZFroot ZfSME
+%\input \ZFroot AKindle    % nastavenia pre Amazon Kindle (č/b e-book A6)
+%\input \ZFroot BBQ10      % nastavenia pre Black Berry Q10
+%\let\SmallSkip=\smallskip % pre kompatibilutu s pôvodným ZfSME
+%\let\MedSkip=\medskip     % pre kompatibilutu s pôvodným ZfSME
+%\def\vycentruj{}          % pre kompatibilutu s pôvodným ZfSME
+%\def\RiadkovyRegister{0}  % po odkomentovaní funguje RR s ZfSME2
+%% odkomentovať len jeden z nasledujúcich 2 riadkov:
+%\input \ZFroot ZfSME2 % upravené makrá reagujú na parameter pre RR
+%\input \ZFroot ZfSME % pôvodné makrá nevedia dodržať riadkový register
+%\ifx\RiadkovyRegister\undefined \def\RiadkovyRegister{0} \fi % pre k. s ZfSME
 %% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
 %\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
 %\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
+%\declCap Ľ {0:24;0,0} \declCap L {0:24;0,0} %odkomentovať len pre font Charter
 
 %% Nastavenie informácií o titule a autorovi; v prípade dlhého názvu alebo mena
 %% je možné použiť \nl na oddelenie riadkov v parametri \Titul a \Autor napr.
