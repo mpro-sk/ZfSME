@@ -181,6 +181,7 @@ echo %%% "$MAINFILEBASE".tex '
 %% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
 %\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
 %\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
+%\declCap Ľ {0:24;0,0} \declCap L {0:24;0,0} %odkomentovať len pre font Charter
 
 %% Nastavenie informácií o titule a autorovi; v prípade dlhého názvu alebo mena
 %% je možné použiť \nl na oddelenie riadkov v parametri \Titul a \Autor napr.
