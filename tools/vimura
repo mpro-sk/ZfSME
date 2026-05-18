@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/bash
 echo $1 
 MAINFILE=$1
 MAINFILEBASE=`echo $1 | cut -d. -f1`
