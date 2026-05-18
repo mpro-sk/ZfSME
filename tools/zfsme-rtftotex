@@ -152,6 +152,7 @@ echo %%% "$MAINFILEBASE".tex '
 %\margins/2 b5 (14,26,20,35)mm % formát B5, P/Ľ zrkadlo, pre a=1/5 šírky strany
 \margins/1 a5 (18,18,18,18)mm % nastavenie formátu A5 a všetky okraje na 18mm
 %\margins/2 a5 (14,22,18,28)mm % formát A5, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%\margins/2 a5 (14,22,18,24)mm % formát A5, P/Ľ zrkadlo, 40 riadkov/strana
 %% Nastavenia strany pre e-book (zariadenia formátu A6, alebo vlastný formát)
 %\margins/1 a6 (3,3,3,11)mm % nastavenie formátu A6, okraje na 3mm, spodný 11mm
                             % (zobrazí sa aj číslo strany v strede päty)
@@ -181,7 +182,6 @@ echo %%% "$MAINFILEBASE".tex '
 %% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
 %\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
 %\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
-%\declCap Ľ {0:24;0,0} \declCap L {0:24;0,0} %odkomentovať len pre font Charter
 
 %% Nastavenie informácií o titule a autorovi; v prípade dlhého názvu alebo mena
 %% je možné použiť \nl na oddelenie riadkov v parametri \Titul a \Autor napr.
