@@ -136,6 +136,7 @@
 %\margins/2 b5 (14,26,20,35)mm % formát B5, P/Ľ zrkadlo, pre a=1/5 šírky strany
 %\margins/1 a5 (18,18,18,18)mm % nastavenie formátu A5 a všetky okraje na 18mm
 %\margins/2 a5 (14,22,18,28)mm % formát A5, P/Ľ zrkadlo, pre a=1/5 šírky strany
+%\margins/2 a5 (14,22,18,24)mm % formát A5, P/Ľ zrkadlo, 40 riadkov/strana
 %% Nastavenia strany pre e-book (zariadenia formátu A6, alebo vlastný formát)
 %\margins/1 a6 (3,3,3,11)mm % nastavenie formátu A6, okraje na 3mm, spodný 11mm
                             % (zobrazí sa aj číslo strany v strede päty)
@@ -562,14 +563,13 @@ $\,{#1\over#2}\,$\fi}}
 \def\NumOff{\nonum \def\nonumfalse{\pagedepth=\pagedepth}}
 \ifnum\NoNum = 1
 \NumOff
-% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
-%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
-
 % Namiesto názvu Kapitola štvotrec na pravej strane (pre nečíslované kapitoly)
 \sdef{mt:chap:sk}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:cs}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:en}{\hfill\vrule height12pt depth2pt width14pt}
 \fi
+% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
+%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
 
 % Predefinovanie RS \chap \sec a \secc z OPmac pre písmenné označenie kapitol, 
 % sekcí a podsekcí (napríklad A, B, C. ...) pomocou nových RS \chapnumf,
