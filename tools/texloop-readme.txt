@@ -80,7 +80,7 @@ Výstupom je dvi súbor, ktorý sa v niektorých prípadoch {\em môže} líši�
 dvi súboru, keby preklad prebehol bez tohto parametra aj v mieste zlomu
 strany, takže tento môže mať iný počet strán. Príkladom je tento text vo
 formáte tex (bez tejto poznámky a následného textu má pri použití veľkosti
-strany A5 dve presne strany, ale ak sa použije ""-src-specials" budú to strany
+strany A5 presne dve strany, ale ak sa použije ""-src-specials" budú to strany
 tri). To isté platí aj pre pdf súbor. Pre tento formát nemá toto rozšírenie
 žiadny význam, preto sa jeho použitie v texloop pre formát pdf automaticky
 potlačí. Pokiaľ chcete použitie -src-specials potlačiť aj pre dvi formát,
@@ -90,5 +90,5 @@ stačí ak posledný parameter skriptu texloop (t. j. tretí alebo štvrtý) je
 ===
 
 Do pôvodného skriptu bola pri otváraní aplikácie xdvi doplnená aj možnosť
-výberu formátu strany -- okrem prednastavenej hodnoty A4 ke možné zadať aj
+výberu formátu strany -- okrem prednastavenej hodnoty A4 je možné zadať aj
 iné formáty, ktoré pozná aplikácia xdvi (letter, A5, A6, B5, B6, ...)
