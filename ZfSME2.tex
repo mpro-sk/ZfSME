@@ -1057,12 +1057,8 @@ $\,{#1\over#2}\,$\fi}}
 
 %%% Doplnené sú aj makrá zo súboru ZfSMEscenar.tex
 
-% Pre staršie verzie CSTeX nemusí byť \elq definované
-\ifx\elq\undefined \chardef \elq 96 \fi
-
 % Prednastavené hodnoty, pokiaľ neboli definované v konfigurácii:
 \ifx\ZFroot\undefined \def\ZFroot{} \fi % ak nie je iná cesta k ZfSME.tex
-\ifx\Vers\undefined \input \ZFroot ZfSME \fi % ak nie je načítaný ZfSME.tex
 
 % Predefinovaie makra \TypoInfo pre použitie v českej aj slovenskej verzii
 % textu (pomocou makier \sdef a \mtext z balíka OPmac):
