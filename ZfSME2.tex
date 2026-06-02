@@ -229,7 +229,6 @@
 \ifnum\LogoZF<0 \def\RiadkovyRegister{0}\fi    % RR len pre tlačové formáty
 \isdefined{ptex }\iftrue\else\newdimen\ptex\fi % ak rozmer \ptex nie je
                                                % definovaný v konfigurácii 
-
 \ifnum\RiadkovyRegister = 1 % TBN, str. 114
 \bigskipamount=12pt 
 \medskipamount=6pt
@@ -341,8 +340,7 @@
    \nobreak \advance\dimen0 by-2\baselineskip
    \vskip \dimen0 \hbox{}}
 
-
-% Tlač pod/sekcie doplnená o zarovnanie textu vľavo (\fL)
+%% Tlač pod/sekcie doplnená o zarovnanie textu vľavo (\fL)
   \ifnum\RiadkovyRegister=0
   \def\printsec#1{\par \norempenalty-400 \bigskip
     {\IfL\secfont \noindent \dotocnum
@@ -374,7 +372,6 @@
     \firstnoindent
   }%
   \fi
-
 
 % Vytvorenie úrovne vyznačovania pre pod-pod-sekciu, text zarovnaný vľavo
 % (bez číslovania a bez vytvárania záznamu pre obsah)
@@ -487,13 +484,11 @@
 \def\Itemm#1\par{\smallskip\item #1\nobreak\smallskip}
 \fi
 
-
 % Oddeľovač hviezdička medzi odstavcami (2/2025 zmena smallskip->medskip):
 \def\Hviezdicka{\nobreak\skiplines{.5}\centerline{*}\medskip}
 
 % Slovo Koniec a jeho formát pre celý riadok na konci kapitol
 \def\Koniec#1\par{\nobreak\MedSkip\noindent{\it Koniec\ #1}}
-
 
 % Formát pre verše
 \def\nnarrower{\narrower\narrower}
@@ -541,7 +536,6 @@ $\,{#1\over#2}\,$\fi}}
 % Prepínač formátu zlomkov
 \def\FRswitch{\ifnum\FRformat=0\def\FRformat{1}\else\def\FRformat{0}\fi}
 
-
 % Polovičná medzera voči \, (t. j. polovica \thinspace)
 \def\:{\ifmmode\mkern2mu\fi }
 % pre niektoré fonty však môže byť definovaná odlišne:
@@ -553,22 +547,21 @@ $\,{#1\over#2}\,$\fi}}
 \def\:{\ifmmode\mkern4mu\fi } 
 \fi\fi\fi
 
+% Potlačenie číslovania kapitol, sekcií a podsekcií
+% https://petr.olsak.net/opmac-tricks.html#globnonum
+\def\NumOff{\nonum \def\nonumfalse{\pagedepth=\pagedepth}}
+\ifnum\NoNum = 1 \NumOff \fi
+% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
+%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
+
 % Doplnenie znaku - na začiatok riadku v prípade delenia slov s týmto znakom
 % TBN str. 217 (Řešení 3.)
 \def\={\discretionary{-}{-}{-}}
 
-% Potlačenie číslovania kapitol, sekcií a podsekcií
-% https://petr.olsak.net/opmac-tricks.html#globnonum
-\def\NumOff{\nonum \def\nonumfalse{\pagedepth=\pagedepth}}
-\ifnum\NoNum = 1
-\NumOff
 % Namiesto názvu Kapitola štvotrec na pravej strane (pre nečíslované kapitoly)
 \sdef{mt:chap:sk}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:cs}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:en}{\hfill\vrule height12pt depth2pt width14pt}
-\fi
-% Pre globálne obnovenie číslovania sa používa nasledovný odkomentovaný riadok:
-%\newif\ifnonum \nonumfalse \def\nonum{\global\nonumtrue} \def\NoNum{0}
 
 % Predefinovanie RS \chap \sec a \secc z OPmac pre písmenné označenie kapitol, 
 % sekcí a podsekcí (napríklad A, B, C. ...) pomocou nových RS \chapnumf,
