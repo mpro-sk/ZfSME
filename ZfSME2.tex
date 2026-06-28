@@ -350,13 +350,23 @@
     \nobreak \remskip\medskipamount \firstnoindent
   }%
   \else
-  \def\printsec#1{\par \norempenalty-400 \bigskip
+  \def\printsec#1{\ifnum\SecNote=0
+    \par \norempenalty-400 \bigskip
     \vycentruj\vbox{%
     {\IfL\secfont \noindent \dotocnum
     {\thetocnum\quad}#1\nbpar}%
     \remskip.6\bigskipamount}%
-    \insertmark{#1}\firstnoindent
-  \nobreak}% 
+    \insertmark{#1}\firstnoindent\nobreak
+    \else % umožní pri dodržaní riadkového registra aj poznámku pod čiarou
+    {\par\norempenalty-400\lineskiplimit=-24pt\skiplines{1}
+     \def\SkipB{.55}%
+    {\IfL\secfont \noindent \dotocnum
+    {\thetocnum\quad}#1\nbpar}%
+    \insertmark{#1}%
+    \ifnum\prevgraf>1 \def\SkipB{.15}\ifnum\prevgraf>2 \def\SkipB{.66}\fi\fi 
+    \nobreak \skiplines{\SkipB} \firstnoindent
+   }\fi
+  }% 
   \fi
   \ifnum\RiadkovyRegister=0
   \def\printsecc#1{\par \norempenalty-200 \medskip
@@ -365,36 +375,23 @@
     \nobreak \remskip\medskipamount \firstnoindent
   }%
   \else
-  \def\printsecc#1{\par \norempenalty-200 \bigskip
+  \def\printsecc#1{\ifnum\SecNote=0
+    \par \norempenalty-200 \bigskip
     \vycentruj\vbox{%
     {\IfL\seccfont \noindent \dotocnum
     {\thetocnum\quad}#1\nbpar}%
     \remskip\medskipamount}%
-    \firstnoindent
-  \nobreak}%
-  \fi
-%% Tlač pod/sekcie doplnená o možnosť vloženia poznámky pod čiarou aj pri
-%% požiadavke na dodržanie riadkového registra
-\ifnum\RiadkovyRegister=1
-\ifnum\SecNote=1
-  \def\printsec#1{{\par\norempenalty-400
-     \lineskiplimit=-24pt\skiplines{1}
-     \def\SkipB{.55}%
-    {\IfL\secfont \noindent \dotocnum
-    {\thetocnum\quad}#1\nbpar}%
-     \insertmark{#1}%
-    \ifnum\prevgraf>1 \def\SkipB{.1}\ifnum\prevgraf>2 \def\SkipB{.66}\fi\fi 
-    \nobreak \skiplines{\SkipB} \firstnoindent
-  }}% 
-  \def\printsecc#1{{\par\norempenalty-200
-     \LineSkipOrg=\baselineskip \lineskiplimit=-24pt\skiplines{1}
-     \def\SkipB{.66}%
+    \firstnoindent\nobreak
+    \else % umožní pri dodržaní riadkového registra aj poznámku pod čiarou
+    {\par\norempenalty-200\lineskiplimit=-24pt\skiplines{.7}
+     \def\SkipB{.1}%
     {\IfL\seccfont \noindent \dotocnum
     {\thetocnum\quad}#1\nbpar%
-     \ifnum\prevgraf>1 \def\SkipB{.5}\ifnum\prevgraf>2 \def\SkipB{.3}\fi\fi 
+     \ifnum\prevgraf>1 \def\SkipB{.75}\ifnum\prevgraf>2 \def\SkipB{.6}\fi\fi 
      \nobreak \skiplines{\SkipB} \firstnoindent}
-   }}%
-\fi\fi
+   }\fi
+  }%
+  \fi
 
 % Vytvorenie úrovne vyznačovania pre pod-pod-sekciu, text zarovnaný vľavo
 % (bez číslovania a bez vytvárania záznamu pre obsah)
