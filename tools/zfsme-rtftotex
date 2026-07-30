@@ -179,6 +179,7 @@ echo %%% "$MAINFILEBASE".tex '
 \input \ZFroot ZfSME % pôvodné makrá nevedia dodržať riadkový register
 \ifx\RiadkovyRegister\undefined \def\RiadkovyRegister{0} \fi % pre k. s ZfSME
 %% Upresnenie umiestnenia veľkých začiatočných písmen (až po načítaní ZfSME)
+%% (nie je potrebné, ak sa používa ZfSME2, tam sa to nastaví automaticky)
 %\declCap J {1:26;2,1} %odkomentovať pre Palatino a AntykwaTorunska (2 riadky)
 %\declCap J {1:38;2,0,0} %odkomentovať pre Palatino a AntykwaTorunska (3 riad.)
 
