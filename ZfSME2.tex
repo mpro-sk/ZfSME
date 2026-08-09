@@ -594,9 +594,15 @@ $\,{#1\over#2}\,$\fi}}
 \def\={\discretionary{-}{-}{-}}
 
 % Namiesto názvu Kapitola štvotrec na pravej strane (pre nečíslované kapitoly)
+\ifnum\NoNum = 1
 \sdef{mt:chap:sk}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:cs}{\hfill\vrule height12pt depth2pt width14pt}
 \sdef{mt:chap:en}{\hfill\vrule height12pt depth2pt width14pt}
+\else
+\sdef{mt:chap:sk}{\hfill\vrule height12pt depth2pt width14pt\relax }
+\sdef{mt:chap:cs}{\hfill\vrule height12pt depth2pt width14pt\relax }
+\sdef{mt:chap:en}{\hfill\vrule height12pt depth2pt width14pt\relax }
+\fi
 
 % Predefinovanie RS \chap \sec a \secc z OPmac pre písmenné označenie kapitol, 
 % sekcí a podsekcí (napríklad A, B, C. ...) pomocou nových RS \chapnumf,
@@ -823,26 +829,24 @@ $\,{#1\over#2}\,$\fi}}
 % Výpočet zlatého rezu pre umiestnenie \vbox-u ľubovoľnej výšky na strane
 % výšky \vsize (pomocou AI Google - viď. poznámky):
 % 1. Alokácia pomocných registrov (stačí definovať raz na začiatku dokumentu)
-\newbox\mojbox
-\newdimen\zbytokvysky
-\newdimen\hornamedzera
+\newbox\MojBox
+\newdimen\ZbytokVysky
+\newdimen\HornaMedzera
 % 2. Definícia samotného makra
-\long\def\zlatyBox#1{%
+\long\def\ZlatyBox#1{%
   % Uložíme obsah do pomocného boxu, aby sme zistili jeho výšku
-  \setbox\mojbox=\vbox{#1}%
+  \setbox\MojBox=\vbox{#1}%
   % Vypočítame voľné miesto na strane: \vsize - výška boxu - výška čiary:
-  \zbytokvysky=\vsize
-  \advance\zbytokvysky by -\ht\mojbox
-  \advance\zbytokvysky by -0.4pt % pre čiaru \hrule s hrúbkou 0.4pt
+  \ZbytokVysky=\vsize
+  \advance\ZbytokVysky by -\ht\MojBox
+  \advance\ZbytokVysky by -0.4pt % pre čiaru \hrule s hrúbkou 0.4pt
   % Vynásobíme voľné miesto koeficientom 0.38197 pre hornú medzeru:
-  \hornamedzera=\zbytokvysky
-  \divide\hornamedzera by 100000
-  \multiply\hornamedzera by 38197
+  \HornaMedzera=.38197\ZbytokVysky
   % Vygenerujeme samotnú stranu s boxom:
   \vbox to \vsize{%
     \KindleHR                 % Fixný prvok na úplnom začiatku strany
-    \vskip\hornamedzera       % Medzera sa teraz neodstráni
-    \box\mojbox               % Vloženie samotného boxu
+    \vskip\HornaMedzera       % Medzera sa teraz neodstráni
+    \box\MojBox               % Vloženie samotného boxu
     \vfil                     % Pružná medzera dopočíta zvyšok strany do \vsize
   }%
   \eject                      % Sadzba hotovej strany
@@ -883,12 +887,12 @@ $\,{#1\over#2}\,$\fi}}
 }}
 
 % Nová definícia pre titulnú stranu s presným umiestnením boxu s titulom
-% a autorom do zlatého rezu výšky strany (potrebné makro \zlatyBox)
+% a autorom do zlatého rezu výšky strany (potrebné makro \ZlatyBox)
 \def\TitulStrana{% Vytvorenie strany pre titul (2. generovaná strana)
 \nopagenumbers % titulá strana až po obsah bez číslovaných strán
 \ifnum\pageno>0 \pageno=-1 \fi % od titulu až po obsah budú záporné strany 
 {\hoffset=\HoffsetTitul \voffset=\VoffsetTitul \vsize=\VsizeTitul
-\zlatyBox{%
+\ZlatyBox{%
 {\noindent\fC\titfont\Titul\par}
 \AuthorF \Autor\par
 }
