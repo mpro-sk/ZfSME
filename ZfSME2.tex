@@ -647,7 +647,7 @@ $\,{#1\over#2}\,$\fi}}
                  \def\Incrmss{1} \def\Decrmss{-1} \fi
     \seccnum=#1 \advance\seccnum by\Decrmss \charsecc=0 \fi
 }
-% + doplneneie definíce \ChapTitle do makra \chap
+% + doplneneie definíce \ChapTitle a \headchap do makra \chap
 \eoldef\chap#1{\ifnonum\else \global\advance\chapnum by\Incrmc \fi
   \chaphook {\globaldefs=1 \secnum=0 \seccnum=0 \tnum=0 \fnum=0 \dnum=0%
              \charsec=0 \charsecc=0 \def\Incrms{1} \def\Decrms{-1}%
