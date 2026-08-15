@@ -659,7 +659,8 @@ $\,{#1\over#2}\,$\fi}}
   \edef\thesecnum{\IfRo{\chapnum}\IfR{\secnum}}%
   \def\dotocnumafter{\wtotoc0\bfshape{#1}}%
   \printchap{#1}\resetnonumnotoc
-  \def\ChapTitle{#1} % doplnené do pôvodnej definície \chap
+  \xdef\headchap{\ifnonum\else\thechapnum~\fi} % doplnené do pôvodnej
+  \def\ChapTitle{#1}                           % definície \chap
 }
 % Doplnenie začiatočnej nepárnej strany kapitoly  do makra \printchap
 \def\printchap#1{\null\vfill\supereject
@@ -733,7 +734,8 @@ $\,{#1\over#2}\,$\fi}}
                    \vphantom{\^Č}}}% 6.2.2025 doplnené \vphantom{\^Č}
 \def\LaveZahlavie{\ifx\ChapTitle\null \else \def\MySpace{4pt}\fi
                  {\ifx\ChapTitle\firstmark \it \else \sl \fi
-                  \HeadSize\vphantom{\^Č}% 6.2.2025 doplnené \vphantom{\^Č}
+                  \ifx\headchap\undefined \def\headchap{} \fi
+                  \headchap\HeadSize\vphantom{\^Č}% 08/2026 doplnenie \headchap
                   \ChapTitle\kern\MySpace \HeadRule}}
 % Makro pre tlač záhlavia \TlacZahlavia na základe parametra \ZahlavieTlac
 \def\TlacZahlavia{\ifnum\ZahlavieTlac = 1
@@ -1151,6 +1153,7 @@ $\,{#1\over#2}\,$\fi}}
 \def\CB{\caps\bf}
 % Kapitálky nefungujú v písme CM/CS, preto:
 \ifx\FontType\CMCS 
+\let\caps=\empty
 \let\CR=\empty 
 \let\CB=\bf 
 % Nefungujú tu ani ,jednoduché` úvodzovky (viď TPP s. 16 a s. 134):
@@ -1160,6 +1163,14 @@ $\,{#1\over#2}\,$\fi}}
 % Kapitálky nefungujú ani v písme Charter, preto:
 \def\tmp{Charter}
 \ifx\FontType\tmp
+\let\caps=\empty
+\let\CR=\empty 
+\let\CB=\bf 
+\fi
+% Kapitálky nefungujú ani v písme Latin Modern, preto:
+\def\tmp{Latin Modern}
+\ifx\FontType\tmp
+\let\caps=\empty 
 \let\CR=\empty 
 \let\CB=\bf 
 \fi
