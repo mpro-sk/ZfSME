@@ -58,7 +58,7 @@ dpicheck=$(od -j$(echo $(grep -a -o -b 'JFIF' $file | cut -d: -f1)) -N12 -t x1 $
 if [ "$dpicheck" = "01" ] ; then let dpi=hdpi ;
 fi fi
 ### ručné nastavenie dpi, ak nie je možné zistiť z jpg súboru:
-   if [ "$dpi" = "0" ] ; then
+   if [ "$dpi" -lt "72" ] ; then
    echo "Prednastavená hodnota DPI je 72"
    read -p 'DPI: ' dpi
        if [ "$dpi" = "" ] ; then
@@ -67,6 +67,8 @@ fi fi
    let hdpi=dpi vdpi=dpi dpi=0 ;
    fi 
 #echo "DPI je $dpi" # po odladení je možné tento riadok zakomentovať
+#echo "HDPI je $hdpi" # po odladení je možné tento riadok zakomentovať
+#echo "VDPI je $vdpi" # po odladení je možné tento riadok zakomentovať
 hsize=$(echo "$(file $file)" | sed 's/^.\+x.\+ \([0-9]\+\)x.\+/\1/')
 vsize=$(echo "$(file $file)" | sed 's/^.\+x.\+x\([0-9]\+\).\+/\1/')
 let hsize=hsize*72/hdpi vsize=vsize*72/vdpi ;
