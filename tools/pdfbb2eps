@@ -31,7 +31,7 @@ let hdpi=65536*hhdpi+hdpi hdpi=hdpi*254/10000 ;
 let vdpi=65536*hvdpi+vdpi vdpi=vdpi*254/10000 dpi=hdpi ;
 fi fi
 ### ručné nastavenie dpi, ak nie je možné zistiť z png súboru:
-   if [ "$dpi" = "0" ] ; then
+   if [ "$dpi" -lt "72" ] ; then
    echo "Prednastavená hodnota DPI je 72"
    read -p 'DPI: ' dpi
        if [ "$dpi" = "" ] ; then
