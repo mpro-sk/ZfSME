@@ -464,7 +464,9 @@
 \sdef{mt:typoinfo:cs}%
 {Sazba programem \ulink[https://ctan.org]{\TeX} písmem \FontType.}
 \def\TypoInfo{% Vytlačí info o TeX a použitom fonte
-\ifdim\vsize > 120mm \vskip 48pt\noindent \else \bigskip\noindent \fi
+\ifdim\vsize > 120mm \ifdim\hsize > \MinHSize 
+\vskip 48pt\noindent \else \bigskip\noindent \fi
+                     \else \bigskip\noindent \fi
 \mtext{typoinfo}}
 
 % Vytvorenie formátu pre jazykovú úpravu, text zarovnaný vľavo
@@ -531,7 +533,7 @@
     \removelastskip\smallskip\noindent
                  \MfT #1\smallskip}\else
 {\ifx\NoBr\undefined \let\NoBr=\allowbreak \fi
-    \removelastskip\SmallSkip\noindent\nnarrower\fL
+    \removelastskip\SmallSkip\noindent\fL\nnarrower
                  \MfT #1\par\NoBr\SmallSkip}\fi
                 }
 
@@ -857,17 +859,20 @@ $\,{#1\over#2}\,$\fi}}
 % Generovanie okrajov strán (hoffset, voffset) pre patitul a titul, musia
 % byť nazávislé od okrajov pre ostatné strany
 \ifdim\pgwidth=0pt \pgwidth=210mm \pgheight=297mm \fi % nastaví sa na A4
-\newdimen\HoffsetTitul \HoffsetTitul=\pgwidth
+\newdimen\HoffsetTitul 
+\newdimen\VoffsetTitul 
+\newdimen\VsizeTitul
+\HoffsetTitul=\pgwidth
 \advance\HoffsetTitul by -\hsize
 \divide\HoffsetTitul  by 2 % rovnaký pravý a ľavý okraj (ako ich priemer)
+\VsizeTitul=\vsize
+\ifdim\pgwidth>105mm % pre všetky formáty s pomerom strán 1,414 (A4, B5, A5)
+% 1,414*2*0,38197=1,08 (dve rovnaké medzery rozdeliť do zlatého rezu)
+\VoffsetTitul=1.08\HoffsetTitul \VsizeTitul=1.414\hsize
+\else % pre ebooky sa zachovávajú rozmery tlačového zrkadla
+\VoffsetTitul=\HoffsetTitul \VsizeTitul=\vsize
+\fi
 \advance\HoffsetTitul by -1in
-\newdimen\VoffsetTitul \newdimen\VsizeTitul \VsizeTitul=\vsize
-\ifdim\pgwidth>176mm \VoffsetTitul=1in  \VsizeTitul=246mm \else % pre A4
-\ifdim\pgwidth>148mm \VoffsetTitul=24mm \VsizeTitul=202mm \else % pre B5
-\ifdim\pgwidth>105mm \VoffsetTitul=18mm \VsizeTitul=174mm \else % pre A5
-\ifdim\pgwidth>78mm  \VoffsetTitul=3mm                    \else % pre eb, ebr
-\ifdim\pgwidth=78mm  \VoffsetTitul=1mm                          % pre ebsr
-\fi\fi\fi\fi\fi
 \advance\VoffsetTitul by -1in
 
 \def\PatitulStrana{% Vytvorenie strany pre patitul (1. generovaná strana)

@@ -1,6 +1,7 @@
 %%% Pre aktiváciu nastavení odkomentovať riadok  (nie v tomto súbore,  ale
 %%% v prekladanom zdrojovom súbore, umiestnenom tesne pred načítaním makra
-%%% ZfSME):
+%%% ZfSME či ZfSME2):
+%\def\BBQ{0} % odkomentovať len pre iný telefón ako BBQ10
 %\input \ZFroot BBQ10 % nastavenia pre BlackBerry Q10
 
 \hyperlinks{\Blue}{\Green}      % nastavenie farebných klikacích odkazov
@@ -9,6 +10,13 @@
 \def\LogoZF{-1}                 % čísla strán v strede päty (pre e-book)
 \def\ZahlavieTlac{0}            % bez tlače záhlavia
 \emergencystretch=2em % nastavenie väčších medzier bez podmienky \MinHSize
-%\def\TitSkip{-0} 
-\margins/1 ebsr (1,1,1,1)mm %nastavenie formátu na ebook, všetky okraje na 1mm
-                            %(v tomto prípade sa nebudú zobrazovať čísla strán)
+\sdef{pgs:ebsr}{(78,78)mm} % 78mm je najmenší rozmer pre tabuľku Miery a váhy
+\sdef{pgs:ebmt}{(80,150)mm} % 78mm je najmenší rozmer pre tabuľku Miery a váhy
+\ifx\BBQ\undefined
+\margins/1 ebsr (1,1,1,1.5)mm % formát pre ebook, všetky okraje na 1mm, spodný
+                              % 1,5mm (v tomto prípade sa nebudú zobrazovať
+                              % čísla strán)
+\else
+\margins/1 ebmt (2,2,3,11)mm  % formát pre ebook, Ľ/P okraj na 2 mm, horný
+                              % 3 mm a spodný 11 mm
+\fi
