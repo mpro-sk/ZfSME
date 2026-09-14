@@ -51,7 +51,7 @@
 %% (odkomentovať len jeden z nasledovných 4 riadkov):
 %\input ctimes \def\FontType{Times Roman} 
 %\input cbookman \def\FontType{Bookman} \VshiftFont=2\ptex
-%\input cncent \def\FontType{New Century Schoolbook} \VshiftFont=4.4\ptex
+%\input cncent \def\FontType{New Century} \VshiftFont=4.4\ptex
 %\input cpalatin \def\FontType{Palatino} \VshiftFont=4\ptex 
 %% Nové fonty z inšalácie \CS\TeX (rez pre \sl je použitý z CS-CM,
 %% pokiaľ nie je aktívna RS \let\sl=\it na konci riadku);
@@ -227,6 +227,7 @@
 \ifx\RiadkovyRegister\undefined \def\RiadkovyRegister{0}\fi
 \ifx\SmallSkip\undefined \let\SmallSkip=\smallskip\fi
 \ifx\MedSkip\undefined \let\MedSkip=\medskip\fi
+\ifx\rpcode\undefined \def\MinOkraj{\hsize}\def\NumColumns{1}\fi %ak nie pdfTeX
 \ifnum\LogoZF<0 \def\RiadkovyRegister{0}\fi    % RR len pre tlačové formáty
 \isdefined{ptex }\iftrue\else\newdimen\ptex\fi % ak nie je v konfigurácii 
 \ifnum\RiadkovyRegister = 1 % TBN, str. 114
