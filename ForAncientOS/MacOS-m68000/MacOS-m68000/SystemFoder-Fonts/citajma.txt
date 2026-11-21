@@ -1,1 +1,0 @@
-Tieto fonty je potrebne mat v System Folder:Fonts. Pokial tam chybaju, je mozne ich doplnit do tohto adresara (len tie, ktore chybaju).
