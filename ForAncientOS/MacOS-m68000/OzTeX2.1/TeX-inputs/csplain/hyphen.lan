@@ -1,0 +1,108 @@
+% File HYPHEN.LAN does:
+%   (1) defines new languages
+%   (2) incorporates their hyphenation tables (except of US english)
+%       during the \csaccents is active (see extcode.tex file).
+%   (3) incorporates their exceptions of hyphenation rules.
+%
+%  Created by Oldrich Ulrych,                         January 5, 1993
+%  Some little changes by Petr Olsak                  April 1995
+%
+% The TeX version >= 3.0 is required.
+
+\message{Hyphen.lan, }
+
+% ======== Pattern Input / English, Czech, Slovakian (French, German) ======
+
+% lplain has not implemented \newlanguage as plain, so I prefere
+% explicite numbering corresponding to german.sty
+
+ % USenglish hyphenation patterns and hyphenation exceptions
+
+\newcount\USenglish  \global\USenglish=0
+
+\begingroup          \language=\USenglish
+%\input hyphen.tex \relax   % read by plain.tex
+\input hyphen.ex \relax
+\endgroup
+
+% The \v, \', ... expands to characters by ISO-8859-2
+\csaccents
+
+% german hyphenation patterns and hyphenation exceptions
+
+\newcount\german     \global\german=1
+
+% \begingroup        \language=\german
+% \input gehyphen.tex \relax
+% \input gehyphen.ex \relax
+% \endgroup
+
+% austrian hyphenation patterns and hyphenation exceptions
+
+\newcount\austrian   \global\austrian=2
+
+% \begingroup        \language=\german
+% \input auhyphen.tex \relax
+% \input auhyphen.ex \relax
+% \endgroup
+
+\newcount\french     \global\french=3
+
+%% french hyphenation patterns
+% \begingroup        \language=\french
+% \input frhyphen.tex \relax
+% \input frhyphen.ex \relax
+% \endgroup
+
+% USenglish hyphenation patterns and hyphenation exceptions
+
+\newcount\english    \global\english=4
+
+%\begingroup          \language=\english
+%\input enhyphen.tex  \relax
+%\input enhyphen.ex \relax
+%\endgroup
+
+% Czech hyphenation patterns and hyphenation exceptions
+
+\newcount\czech      \global\czech=5
+
+\begingroup          \language=\czech
+\let\global=\relax
+\input czhyphen.tex \relax
+\input czhyphen.ex \relax
+\endgroup
+
+% Czech hyphenation patterns and hyphenation exceptions
+
+\newcount\slovak     \global\slovak=6
+
+\begingroup          \language=\slovak
+\let\global=\relax
+\input skhyphen.tex \relax
+\input skhyphen.ex \relax
+\endgroup
+
+% ======= definitions for fast hyphenations =====
+
+\def\ehyph{\language=\USenglish \lccode`\'=0        \nonfrenchspacing
+           \lefthyphenmin=2       \righthyphenmin=3
+           \message{English hyphenation used.
+                    \string\nonfrenchspacing\space is set on.}}
+%\def\ahyph{\language=\german     \lccode`\'=`\'      \frenchspacing
+%           \lefthyphenmin=2      \righthyphenmin=2                     }
+%\def\ghyph{\language=\german     \lccode`\'=`\'      \frenchspacing
+%           \lefthyphenmin=2      \righthyphenmin=2                     }
+%\def\fhyph{\language=\french     \lccode`\'=`\'      \frenchspacing
+%           \lefthyphenmin=2      \righthyphenmin=2                     }
+\def\chyph{\language=\czech       \lccode`\'=`\'      \frenchspacing
+           \lefthyphenmin=2       \righthyphenmin=3
+           \message{Czech hyphenation used.
+                    \string\frenchspacing\space is set on.}}
+\def\shyph{\language=\slovak      \lccode`\'=`\'      \frenchspacing
+           \lefthyphenmin=2       \righthyphenmin=3
+           \message{Slovakian hyphenation used.
+                    \string\frenchspacing\space is set on.}}
+
+% Restore the original meaning of \v, \', ...
+\cmaccents
