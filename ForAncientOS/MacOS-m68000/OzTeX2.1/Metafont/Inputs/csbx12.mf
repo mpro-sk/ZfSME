@@ -1,3 +1,0 @@
-input cscode
-circ_weight:=.7;
-use_driver;
